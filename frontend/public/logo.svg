@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <!-- Healthcare Gradient -->
+    <linearGradient id="orbitGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#0EA5A4"/>
+    </linearGradient>
+
+    <linearGradient id="orbitGradient2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0EA5A4"/>
+      <stop offset="100%" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ICON -->
+  <g transform="translate(130,130)">
+
+    <!-- Orbit 1 -->
+    <ellipse cx="0" cy="0" rx="60" ry="95"
+      fill="none"
+      stroke="url(#orbitGradient1)"
+      stroke-width="16"
+      transform="rotate(45)" />
+
+    <!-- Orbit 2 -->
+    <ellipse cx="0" cy="0" rx="60" ry="95"
+      fill="none"
+      stroke="url(#orbitGradient2)"
+      stroke-width="16"
+      transform="rotate(-45)" />
+
+    <!-- Rounded Medical Plus -->
+    <rect x="-15" y="-48" width="30" height="96" rx="10" fill="#1E293B"/>
+    <rect x="-48" y="-15" width="96" height="30" rx="10" fill="#1E293B"/>
+
+  </g>
+
+  <!-- TEXT -->
+  <text x="260" y="155"
+        font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+        font-size="80"
+        font-weight="700"
+        letter-spacing="-1"
+        fill="#0F172A">
+    Aaro<tspan fill="#1E40AF">g</tspan>en<tspan fill="#0EA5A4">tix</tspan>
+  </text>
+
+</svg>

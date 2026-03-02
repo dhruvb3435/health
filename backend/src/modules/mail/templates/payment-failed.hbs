@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .container {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: #f8d7da;
+            padding: 20px;
+            text-align: center;
+            color: #721c24;
+        }
+
+        .content {
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Payment Failed</h1>
+        </div>
+        <div class="content">
+            <p>Hello {{name}},</p>
+            <p>The recent payment for your subscription for <strong>{{organizationName}}</strong> has failed.</p>
+            <p>To prevent any service interruption, please update your payment method as soon as possible.</p>
+            <p style="text-align: center;">
+                <a href="{{billingUrl}}" class="button">Update Payment Method</a>
+            </p>
+            <p>If you have any questions, please contact our support team.</p>
+            <p>Best regards,<br>The Aarogentix Team</p>
+        </div>
+    </div>
+</body>
+
+</html>

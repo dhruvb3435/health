@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#0EA5A4"/>
+    </linearGradient>
+
+    <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0EA5A4"/>
+      <stop offset="100%" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Center Group -->
+  <g transform="translate(128,128)">
+
+    <!-- Orbit 1 -->
+    <ellipse cx="0" cy="0" rx="55" ry="85"
+      fill="none"
+      stroke="url(#g1)"
+      stroke-width="16"
+      transform="rotate(45)" />
+
+    <!-- Orbit 2 -->
+    <ellipse cx="0" cy="0" rx="55" ry="85"
+      fill="none"
+      stroke="url(#g2)"
+      stroke-width="16"
+      transform="rotate(-45)" />
+
+    <!-- Rounded Plus -->
+    <rect x="-14" y="-45" width="28" height="90" rx="10" fill="#1E293B"/>
+    <rect x="-45" y="-14" width="90" height="28" rx="10" fill="#1E293B"/>
+
+  </g>
+
+</svg>

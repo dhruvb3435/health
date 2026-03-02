@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .details {
+            background-color: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #718096;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Appointment Confirmed</h1>
+        <p>Hello <strong>{{patientName}}</strong>,</p>
+        <p>Your appointment has been successfully scheduled. Here are the details:</p>
+        <div class="details">
+            <p><strong>Doctor:</strong> {{doctorName}}</p>
+            <p><strong>Date:</strong> {{date}}</p>
+            <p><strong>Time:</strong> {{time}}</p>
+            {{#if isVirtual}}
+            <p><strong>Type:</strong> Virtual Consultation</p>
+            <p><strong>Meeting Link:</strong> <a href="{{meetingLink}}">{{meetingLink}}</a></p>
+            {{else}}
+            <p><strong>Type:</strong> In-person Visit</p>
+            {{/if}}
+        </div>
+        <p>Please arrive 15 minutes early for check-in.</p>
+        <div class="footer">
+            &copy; 2026 Aarogentix. All rights reserved.
+        </div>
+    </div>
+</body>
+
+</html>
