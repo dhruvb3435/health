@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsDateString, IsNumber } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { SurgeryStatus } from '../entities/operation-theater.entity';
 
 export class CreateSurgeryDto {
@@ -78,4 +78,4 @@ export class CreateSurgeryDto {
     estimatedCost?: number;
 }
 
-export class UpdateSurgeryDto extends CreateSurgeryDto { }
+export class UpdateSurgeryDto extends PartialType(CreateSurgeryDto) { }

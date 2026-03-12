@@ -37,6 +37,7 @@ import { FeatureLimit } from '../modules/subscriptions/entities/feature-limit.en
 import { OrganizationUsage } from '../modules/subscriptions/entities/organization-usage.entity';
 import { Payment } from '../modules/billing/entities/payment.entity';
 import { EmailVerificationToken } from '../modules/auth/entities/email-verification-token.entity';
+import { Department } from '../modules/departments/entities/department.entity';
 
 const ENTITIES = [
   User, Patient, Doctor, Appointment, Prescription, MedicalRecord,
@@ -45,7 +46,7 @@ const ENTITIES = [
   Expense, Revenue, ComplianceRecord, DataAccessLog,
   Organization, Role, Permission,
   Plan, Subscription, FeatureLimit, OrganizationUsage, Payment,
-  EmailVerificationToken,
+  EmailVerificationToken, Department,
 ];
 
 export const typeormConfig = (configService: ConfigService): DataSourceOptions => {

@@ -75,8 +75,8 @@ export class AdmissionsService {
             throw new BadRequestException('Admission date cannot be in the future');
         }
 
-        // Check ward capacity
-        const ward = await this.wardRepo.findOne({ where: { id: wardId } });
+        // Check ward capacity (filter by org to prevent cross-tenant access)
+        const ward = await this.wardRepo.findOne({ where: { id: wardId, organizationId } });
         if (!ward) throw new NotFoundException('Ward not found');
         if (ward.occupiedBeds >= ward.totalBeds) {
             throw new BadRequestException(
@@ -84,14 +84,14 @@ export class AdmissionsService {
             );
         }
 
-        // Check bed availability
-        const bed = await this.bedRepo.findOne({ where: { id: bedId } });
+        // Check bed availability (filter by org)
+        const bed = await this.bedRepo.findOne({ where: { id: bedId, organizationId } });
         if (!bed) throw new NotFoundException('Bed not found');
         if (bed.status !== BedStatus.AVAILABLE) {
             throw new BadRequestException('Bed is not available');
         }
 
-        // Create admission
+        // Create admission + update bed/ward atomically
         const admission = this.admissionRepo.create({
             ...createAdmissionDto,
             admissionDate,
@@ -149,8 +149,9 @@ export class AdmissionsService {
 
         await this.admissionRepo.save(admission);
 
-        // Free the bed
-        const bed = await this.bedRepo.findOne({ where: { id: admission.bedId } });
+        // Free the bed (filter by org)
+        const organizationId = this.tenantService.getTenantId();
+        const bed = await this.bedRepo.findOne({ where: { id: admission.bedId, organizationId } });
         if (bed) {
             bed.status = BedStatus.AVAILABLE;
             bed.assignedPatientId = null;
@@ -158,8 +159,8 @@ export class AdmissionsService {
             await this.bedRepo.save(bed);
         }
 
-        // Update ward occupancy
-        const ward = await this.wardRepo.findOne({ where: { id: admission.wardId } });
+        // Update ward occupancy (filter by org)
+        const ward = await this.wardRepo.findOne({ where: { id: admission.wardId, organizationId } });
         if (ward) {
             ward.occupiedBeds = Math.max(0, ward.occupiedBeds - 1);
             await this.wardRepo.save(ward);

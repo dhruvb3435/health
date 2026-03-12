@@ -93,6 +93,19 @@ async function bootstrap() {
     .addTag('Laboratory')
     .addTag('Pharmacy')
     .addTag('Dashboard')
+    .addTag('Staff')
+    .addTag('Departments')
+    .addTag('Admissions')
+    .addTag('Wards')
+    .addTag('Inventory')
+    .addTag('Operation Theater')
+    .addTag('Radiology')
+    .addTag('Accounts')
+    .addTag('Compliance')
+    .addTag('Notifications')
+    .addTag('Subscriptions')
+    .addTag('RBAC')
+    .addTag('Onboarding')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

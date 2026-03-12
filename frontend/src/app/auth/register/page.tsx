@@ -1,12 +1,21 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Check, X as XIcon } from 'lucide-react';
 import apiClient from '@/lib/api-client';
 import toast from 'react-hot-toast';
-import { UserRoleEnum } from '@/types/index';
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,16 +23,25 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
+    organizationName: '',
+    organizationSlug: '',
     firstName: '',
     lastName: '',
+    email: '',
     password: '',
     confirmPassword: '',
-    role: UserRoleEnum.PATIENT,
   });
 
+  // Auto-generate slug from organization name
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      organizationSlug: slugify(prev.organizationName),
+    }));
+  }, [formData.organizationName]);
+
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -31,6 +49,15 @@ export default function RegisterPage() {
       [name]: value,
     }));
   };
+
+  // Password validation
+  const passwordChecks = {
+    minLength: formData.password.length >= 8,
+    hasUppercase: /[A-Z]/.test(formData.password),
+    hasNumber: /\d/.test(formData.password),
+    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
+  };
+  const allPasswordChecksPassed = Object.values(passwordChecks).every(Boolean);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,15 +67,21 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!allPasswordChecksPassed) {
+      toast.error('Password does not meet all requirements');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await apiClient.post('/auth/register', {
-        email: formData.email,
+      await apiClient.post('/auth/register-organization', {
+        organizationName: formData.organizationName,
+        organizationSlug: formData.organizationSlug,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        email: formData.email,
         password: formData.password,
-        role: formData.role,
       });
 
       toast.success('Registration successful! Redirecting to login...');
@@ -62,16 +95,66 @@ export default function RegisterPage() {
     }
   };
 
+  const PasswordCheck = ({ passed, label }: { passed: boolean; label: string }) => (
+    <div className="flex items-center gap-2 text-xs">
+      {passed ? (
+        <Check className="h-3.5 w-3.5 text-emerald-500" />
+      ) : (
+        <XIcon className="h-3.5 w-3.5 text-slate-300" />
+      )}
+      <span className={passed ? 'text-emerald-600 font-medium' : 'text-slate-400'}>
+        {label}
+      </span>
+    </div>
+  );
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-50 p-4">
       <div className="card w-full max-w-md">
         <div className="mb-6 flex items-center justify-center">
           <img src="/logo.svg" alt="Aarogentix logo" className="h-20 w-auto" />
         </div>
-        <h1 className="mb-2 text-2xl font-bold text-primary-600 sm:text-3xl">Join Us</h1>
-        <p className="mb-6 text-slate-600">Create your Aarogentix account</p>
+        <h1 className="mb-2 text-2xl font-bold text-primary-600 sm:text-3xl">Create Account</h1>
+        <p className="mb-6 text-slate-600">Register your organization on Aarogentix</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Organization Fields */}
+          <div>
+            <label htmlFor="organizationName" className="mb-2 block font-medium">
+              Organization Name
+            </label>
+            <input
+              id="organizationName"
+              type="text"
+              name="organizationName"
+              value={formData.organizationName}
+              onChange={handleInputChange}
+              className="input w-full"
+              placeholder="e.g. City General Hospital"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="organizationSlug" className="mb-2 block font-medium">
+              Organization Slug
+            </label>
+            <div className="flex">
+              <span className="inline-flex items-center rounded-l-xl border border-r-0 border-slate-200 bg-slate-100 px-3 text-sm text-slate-500">
+                aarogentix.com/
+              </span>
+              <input
+                id="organizationSlug"
+                type="text"
+                name="organizationSlug"
+                value={formData.organizationSlug}
+                className="input w-full rounded-l-none bg-slate-50"
+                readOnly
+              />
+            </div>
+            <p className="mt-1 text-xs text-slate-400">Auto-generated from organization name</p>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="firstName" className="mb-2 block font-medium">
@@ -84,6 +167,7 @@ export default function RegisterPage() {
                 value={formData.firstName}
                 onChange={handleInputChange}
                 className="input w-full"
+                placeholder="e.g. Dhruv"
                 required
               />
             </div>
@@ -98,6 +182,7 @@ export default function RegisterPage() {
                 value={formData.lastName}
                 onChange={handleInputChange}
                 className="input w-full"
+                placeholder="e.g. Bagadiya"
                 required
               />
             </div>
@@ -114,26 +199,9 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={handleInputChange}
               className="input w-full"
+              placeholder="admin@hospital.com"
               required
             />
-          </div>
-
-          <div>
-            <label htmlFor="role" className="mb-2 block font-medium">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              className="input w-full"
-            >
-              <option value="patient">Patient</option>
-              <option value="doctor">Doctor</option>
-              <option value="nurse">Nurse</option>
-              <option value="receptionist">Receptionist</option>
-            </select>
           </div>
 
           <div>
@@ -148,6 +216,7 @@ export default function RegisterPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 className="input w-full pr-10"
+                placeholder="Create a strong password"
                 minLength={8}
                 required
               />
@@ -163,6 +232,15 @@ export default function RegisterPage() {
                 )}
               </button>
             </div>
+            {/* Password Requirements */}
+            {formData.password.length > 0 && (
+              <div className="mt-2 space-y-1 rounded-xl bg-slate-50 p-3 border border-slate-100">
+                <PasswordCheck passed={passwordChecks.minLength} label="At least 8 characters" />
+                <PasswordCheck passed={passwordChecks.hasUppercase} label="One uppercase letter" />
+                <PasswordCheck passed={passwordChecks.hasNumber} label="One number" />
+                <PasswordCheck passed={passwordChecks.hasSpecial} label="One special character" />
+              </div>
+            )}
           </div>
 
           <div>
@@ -177,6 +255,7 @@ export default function RegisterPage() {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 className="input w-full pr-10"
+                placeholder="Re-enter your password"
                 minLength={8}
                 required
               />
@@ -192,6 +271,9 @@ export default function RegisterPage() {
                 )}
               </button>
             </div>
+            {formData.confirmPassword.length > 0 && formData.password !== formData.confirmPassword && (
+              <p className="mt-1 text-xs text-rose-500 font-medium">Passwords do not match</p>
+            )}
           </div>
 
           <button
@@ -199,7 +281,7 @@ export default function RegisterPage() {
             disabled={isLoading}
             className="btn btn-primary w-full py-2 text-lg"
           >
-            {isLoading ? 'Creating account...' : 'Create Account'}
+            {isLoading ? 'Creating account...' : 'Register'}
           </button>
         </form>
 

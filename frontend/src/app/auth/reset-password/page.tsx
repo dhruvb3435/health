@@ -3,7 +3,7 @@
 import { useState, FormEvent, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, CheckCircle2, Check, X as XIcon } from 'lucide-react';
 import apiClient from '@/lib/api-client';
 import toast from 'react-hot-toast';
 
@@ -28,6 +28,27 @@ function ResetPasswordForm() {
       [name]: value,
     }));
   };
+
+  // Password validation
+  const passwordChecks = {
+    minLength: formData.newPassword.length >= 8,
+    hasUppercase: /[A-Z]/.test(formData.newPassword),
+    hasNumber: /\d/.test(formData.newPassword),
+    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword),
+  };
+
+  const PasswordCheck = ({ passed, label }: { passed: boolean; label: string }) => (
+    <div className="flex items-center gap-2 text-xs">
+      {passed ? (
+        <Check className="h-3.5 w-3.5 text-emerald-500" />
+      ) : (
+        <XIcon className="h-3.5 w-3.5 text-slate-300" />
+      )}
+      <span className={passed ? 'text-emerald-600 font-medium' : 'text-slate-400'}>
+        {label}
+      </span>
+    </div>
+  );
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,9 +85,15 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-slate-600">
-          Invalid or expired reset link. Please request a new one.
-        </p>
+        <div className="flex items-start gap-3 rounded-xl border border-rose-100 bg-rose-50 p-4">
+          <XIcon className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+          <div className="text-left">
+            <p className="font-medium text-rose-900">Invalid Reset Link</p>
+            <p className="mt-1 text-sm text-rose-700">
+              This password reset link is invalid or has expired. Please request a new one.
+            </p>
+          </div>
+        </div>
         <Link
           href="/auth/forgot-password"
           className="inline-flex items-center gap-1.5 font-medium text-primary-600 hover:underline"
@@ -129,6 +156,15 @@ function ResetPasswordForm() {
               )}
             </button>
           </div>
+          {/* Password Requirements */}
+          {formData.newPassword.length > 0 && (
+            <div className="mt-2 space-y-1 rounded-xl bg-slate-50 p-3 border border-slate-100">
+              <PasswordCheck passed={passwordChecks.minLength} label="At least 8 characters" />
+              <PasswordCheck passed={passwordChecks.hasUppercase} label="One uppercase letter" />
+              <PasswordCheck passed={passwordChecks.hasNumber} label="One number" />
+              <PasswordCheck passed={passwordChecks.hasSpecial} label="One special character" />
+            </div>
+          )}
         </div>
 
         <div>
@@ -159,6 +195,9 @@ function ResetPasswordForm() {
               )}
             </button>
           </div>
+          {formData.confirmPassword.length > 0 && formData.newPassword !== formData.confirmPassword && (
+            <p className="mt-1 text-xs text-rose-500 font-medium">Passwords do not match</p>
+          )}
         </div>
 
         <button

@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import { Patient } from '../patients/entities/patient.entity';
 import { Doctor } from '../doctors/entities/doctor.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { Invoice } from '../billing/entities/invoice.entity';
+import { Admission } from '../admissions/entities/admission.entity';
+import { Staff } from '../staff/entities/staff.entity';
+import { Inventory } from '../inventory/entities/inventory.entity';
+import { Ward } from '../wards/entities/ward.entity';
 import { TenantService } from '../../common/services/tenant.service';
 
 @Injectable()
@@ -18,15 +22,32 @@ export class DashboardService {
         private readonly appointmentRepo: Repository<Appointment>,
         @InjectRepository(Invoice)
         private readonly invoiceRepo: Repository<Invoice>,
+        @InjectRepository(Admission)
+        private readonly admissionRepo: Repository<Admission>,
+        @InjectRepository(Staff)
+        private readonly staffRepo: Repository<Staff>,
+        @InjectRepository(Inventory)
+        private readonly inventoryRepo: Repository<Inventory>,
+        @InjectRepository(Ward)
+        private readonly wardRepo: Repository<Ward>,
         private readonly tenantService: TenantService,
     ) { }
 
     async getStats() {
         const organizationId = this.tenantService.getTenantId();
-        const [totalPatients, totalDoctors, totalAppointments] = await Promise.all([
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const [
+            totalPatients, totalDoctors, totalAppointments,
+            todayAppointments, activeStaff, activeAdmissions,
+        ] = await Promise.all([
             this.patientRepo.count({ where: { organizationId } }),
             this.doctorRepo.count({ where: { organizationId } }),
             this.appointmentRepo.count({ where: { organizationId } }),
+            this.appointmentRepo.count({ where: { organizationId, appointmentDate: today } }),
+            this.staffRepo.count({ where: { organizationId, status: 'active' as any } }),
+            this.admissionRepo.count({ where: { organizationId, status: 'admitted' as any } }),
         ]);
 
         // Real revenue calculation
@@ -36,17 +57,30 @@ export class DashboardService {
             .select('SUM(invoice.totalAmount)', 'total')
             .getRawOne();
 
+        // Ward stats
+        const wards = await this.wardRepo.find({ where: { organizationId } });
+        const totalBeds = wards.reduce((sum, w) => sum + w.totalBeds, 0);
+        const occupiedBeds = wards.reduce((sum, w) => sum + w.occupiedBeds, 0);
+
+        // Low stock count
+        const lowStockCount = await this.inventoryRepo
+            .createQueryBuilder('item')
+            .where('item.organizationId = :organizationId', { organizationId })
+            .andWhere('item.quantity <= item.minimumLevel')
+            .getCount();
+
         return {
             totalPatients,
             totalDoctors,
             totalAppointments,
+            todayAppointments,
+            activeStaff,
+            activeAdmissions,
             revenue: parseFloat(revenueResult?.total || '0'),
-            change: {
-                patients: '+12%',
-                appointments: '+8%',
-                doctors: '+2%',
-                revenue: '+23%',
-            },
+            totalBeds,
+            occupiedBeds,
+            availableBeds: totalBeds - occupiedBeds,
+            lowStockItems: lowStockCount,
         };
     }
 
@@ -85,7 +119,9 @@ export class DashboardService {
     }
 
     async getRecentActivity() {
+        const organizationId = this.tenantService.getTenantId();
         const recentAppointments = await this.appointmentRepo.find({
+            where: { organizationId },
             relations: ['patient', 'patient.user', 'doctor', 'doctor.user'],
             order: { appointmentDate: 'DESC' },
             take: 5,

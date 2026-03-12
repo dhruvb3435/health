@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsDateString, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { LabTestStatus } from '../entities/lab-test.entity';
 
 class TestResultDto {
@@ -87,4 +87,4 @@ export class CreateLabTestDto {
     notes?: string;
 }
 
-export class UpdateLabTestDto extends CreateLabTestDto { }
+export class UpdateLabTestDto extends PartialType(CreateLabTestDto) { }

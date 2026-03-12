@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
 export class CreateWardDto {
     @ApiProperty({ example: 'WRD-001' })
@@ -48,4 +48,4 @@ export class CreateWardDto {
     remarks?: string;
 }
 
-export class UpdateWardDto extends CreateWardDto { }
+export class UpdateWardDto extends PartialType(CreateWardDto) { }

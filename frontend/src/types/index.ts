@@ -29,7 +29,6 @@ export interface Organization {
   name: string;
   slug: string;
   logoUrl?: string;
-  subscriptionPlan: 'basic' | 'premium' | 'enterprise';
   status: 'active' | 'suspended' | 'pending';
   settings?: Record<string, unknown>;
 }
@@ -164,6 +163,21 @@ export interface Staff {
   salary?: number;
   contractType?: string;
   notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Department ──
+
+export interface Department {
+  id: string;
+  organizationId: string;
+  name: string;
+  description: string | null;
+  headOfDepartmentId: string | null;
+  isActive: boolean;
+  parentDepartmentId: string | null;
+  parentDepartment?: Department | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -406,8 +420,15 @@ export interface InventoryItem {
 export interface DashboardStats {
   totalPatients: number;
   totalAppointments: number;
+  todayAppointments: number;
   totalDoctors: number;
+  activeStaff: number;
+  activeAdmissions: number;
   revenue: number;
+  totalBeds: number;
+  occupiedBeds: number;
+  availableBeds: number;
+  lowStockItems: number;
 }
 
 export interface DashboardModuleMetrics {

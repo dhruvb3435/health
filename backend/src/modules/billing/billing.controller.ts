@@ -4,17 +4,20 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { PaginationQueryDto } from '../../common/dto/pagination.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/create-invoice.dto';
+import { PermissionsGuard } from '../rbac/guards/permissions.guard';
+import { Permissions } from '../rbac/decorators/permissions.decorator';
 import { Audit } from '../../common/decorators/audit.decorator';
 
 @ApiTags('Billing')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('billing')
 export class BillingController {
     constructor(private readonly billingService: BillingService) { }
 
     @Post('invoices')
     @ApiOperation({ summary: 'Create a new invoice' })
+    @Permissions('billing:create')
     @Audit({ action: 'Create Invoice', entityType: 'Invoice' })
     async create(@Body() createInvoiceDto: CreateInvoiceDto) {
         return this.billingService.create(createInvoiceDto);
@@ -22,6 +25,7 @@ export class BillingController {
 
     @Get('invoices')
     @ApiOperation({ summary: 'Get all invoices' })
+    @Permissions('billing:read')
     @Audit({ action: 'List Invoices', entityType: 'Invoice' })
     async findAll(@Query() query: PaginationQueryDto) {
         return this.billingService.findAll(query);
@@ -29,6 +33,7 @@ export class BillingController {
 
     @Get('invoices/:id')
     @ApiOperation({ summary: 'Get invoice by ID' })
+    @Permissions('billing:read')
     @Audit({ action: 'View Invoice', entityType: 'Invoice' })
     async findOne(@Param('id') id: string) {
         return this.billingService.findOne(id);
@@ -36,6 +41,7 @@ export class BillingController {
 
     @Patch('invoices/:id')
     @ApiOperation({ summary: 'Update an invoice' })
+    @Permissions('billing:update')
     @Audit({ action: 'Update Invoice', entityType: 'Invoice' })
     async update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
         return this.billingService.update(id, updateInvoiceDto);
@@ -43,6 +49,7 @@ export class BillingController {
 
     @Delete('invoices/:id')
     @ApiOperation({ summary: 'Delete an invoice' })
+    @Permissions('billing:delete')
     @Audit({ action: 'Delete Invoice', entityType: 'Invoice' })
     async remove(@Param('id') id: string) {
         return this.billingService.remove(id);

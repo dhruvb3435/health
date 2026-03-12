@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, DataSource } from 'typeorm';
 import { Staff, StaffRole } from './entities/staff.entity';
 import { User, UserRole, UserStatus } from '../users/entities/user.entity';
 import { PaginationQueryDto, PaginatedResponse } from '../../common/dto/pagination.dto';
@@ -18,6 +18,7 @@ export class StaffService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly tenantService: TenantService,
+    private readonly dataSource: DataSource,
   ) { }
 
   async findAll(query: PaginationQueryDto): Promise<PaginatedResponse<Staff>> {
@@ -70,35 +71,37 @@ export class StaffService {
     const { email, firstName, lastName, phoneNumber, ...staffData } = createStaffDto;
     const organizationId = this.tenantService.getTenantId();
 
-    const existingUser = await this.userRepo.findOne({ where: { email, organizationId } });
-    if (existingUser) {
-      throw new ConflictException('Email already registered for this organization');
-    }
+    return await this.dataSource.transaction(async (manager) => {
+      const existingUser = await manager.findOne(User, { where: { email, organizationId } });
+      if (existingUser) {
+        throw new ConflictException('Email already registered for this organization');
+      }
 
-    const hashedPassword = await bcrypt.hash(randomUUID(), BCRYPT_ROUNDS);
-    const user = this.userRepo.create({
-      email,
-      firstName,
-      lastName,
-      phoneNumber,
-      password: hashedPassword,
-      roles: [] as any,
-      status: UserStatus.ACTIVE,
-      userId: staffData.staffId,
-      emailVerified: true,
-      organizationId,
+      const hashedPassword = await bcrypt.hash(randomUUID(), BCRYPT_ROUNDS);
+      const user = manager.create(User, {
+        email,
+        firstName,
+        lastName,
+        phoneNumber,
+        password: hashedPassword,
+        roles: [] as any,
+        status: UserStatus.ACTIVE,
+        userId: staffData.staffId,
+        emailVerified: true,
+        organizationId,
+      });
+
+      const savedUser = await manager.save(user);
+
+      const staff = manager.create(Staff, {
+        ...staffData,
+        user: savedUser,
+        userId: savedUser.id,
+        organizationId,
+      });
+
+      return manager.save(staff);
     });
-
-    const savedUser = await this.userRepo.save(user);
-
-    const staff = this.staffRepo.create({
-      ...staffData,
-      user: savedUser,
-      userId: savedUser.id,
-      organizationId,
-    });
-
-    return this.staffRepo.save(staff);
   }
 
   async update(id: string, updateStaffDto: UpdateStaffDto) {

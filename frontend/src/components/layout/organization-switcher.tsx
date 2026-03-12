@@ -3,9 +3,11 @@
 import React from 'react';
 import { ChevronRight, Building2, Crown } from 'lucide-react';
 import { useOrganization } from '@/hooks/use-organization';
+import { useSubscription } from '@/hooks/use-subscription';
 
 export function OrganizationSwitcher() {
     const { organization, isLoading } = useOrganization();
+    const { plan } = useSubscription();
 
     if (isLoading) {
         return (
@@ -21,7 +23,7 @@ export function OrganizationSwitcher() {
 
     if (!organization) return null;
 
-    const isPremium = organization.subscriptionPlan === 'premium' || organization.subscriptionPlan === 'enterprise';
+    const isPremium = plan === 'pro' || plan === 'enterprise';
 
     return (
         <div className="group relative flex w-full items-center gap-3 rounded-2xl bg-white p-2.5 transition-all hover:bg-slate-50 border border-slate-200/60 shadow-sm hover:shadow-md active:scale-[0.98] cursor-pointer">

@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsArray, IsEnum, IsDateString, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { PrescriptionStatus } from '../entities/prescription.entity';
 
 class MedicineItemDto {
@@ -86,4 +86,4 @@ export class CreatePrescriptionDto {
     expiryDate?: string;
 }
 
-export class UpdatePrescriptionDto extends CreatePrescriptionDto { }
+export class UpdatePrescriptionDto extends PartialType(CreatePrescriptionDto) { }

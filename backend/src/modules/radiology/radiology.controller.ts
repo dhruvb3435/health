@@ -7,9 +7,8 @@ import { Permissions } from '../rbac/decorators/permissions.decorator';
 import { Audit } from '../../common/decorators/audit.decorator';
 
 @ApiTags('Radiology')
-@ApiTags('Radiology')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('radiology')
 export class RadiologyController {
   constructor(private radiologyService: RadiologyService) { }

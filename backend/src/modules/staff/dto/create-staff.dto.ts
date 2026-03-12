@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsEmail, IsOptional, IsEnum, IsDateString, IsNumber, IsBoolean } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { StaffRole, StaffStatus } from '../entities/staff.entity';
 
 export class CreateStaffDto {
@@ -59,4 +59,4 @@ export class CreateStaffDto {
     phoneNumber?: string;
 }
 
-export class UpdateStaffDto extends CreateStaffDto { }
+export class UpdateStaffDto extends PartialType(CreateStaffDto) { }

@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Organization } from '../../organizations/entities/organization.entity';
+import { Department } from '../../departments/entities/department.entity';
 
 export enum StaffRole {
   DOCTOR = 'doctor',
@@ -72,6 +73,10 @@ export class Staff {
 
   @Column({ nullable: true })
   departmentId: string;
+
+  @ManyToOne(() => Department, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'departmentId' })
+  department: Department;
 
   @Column({ nullable: true })
   joiningDate: Date;

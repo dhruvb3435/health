@@ -3,8 +3,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { Bell, CheckCheck, Calendar, Wallet, AlertTriangle, Package, Settings } from 'lucide-react';
+import { Pagination } from '@/components/ui/pagination';
 import toast from 'react-hot-toast';
 import type { Notification } from '@/types';
+
+type FilterTab = 'all' | 'unread' | 'appointment' | 'billing' | 'system' | 'alert';
 
 const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string; border: string }> = {
   appointment: { icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-500' },
@@ -14,6 +17,15 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
   system: { icon: Settings, color: 'text-slate-600', bg: 'bg-slate-100', border: 'border-slate-400' },
   onboarding: { icon: CheckCheck, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-500' },
 };
+
+const filterTabs: { key: FilterTab; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'unread', label: 'Unread' },
+  { key: 'appointment', label: 'Appointments' },
+  { key: 'billing', label: 'Billing' },
+  { key: 'system', label: 'System' },
+  { key: 'alert', label: 'Alerts' },
+];
 
 function timeAgo(date: string) {
   const diff = Date.now() - new Date(date).getTime();
@@ -32,9 +44,10 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const limit = 20;
 
@@ -47,39 +60,41 @@ export default function NotificationsPage() {
     }
   }, []);
 
-  const fetchNotifications = useCallback(async (currentOffset = 0, append = false) => {
-    if (!append) setIsLoading(true);
-    else setIsLoadingMore(true);
-
+  const fetchNotifications = useCallback(async (pageNumber = 1) => {
+    setIsLoading(true);
     try {
-      const res = await apiClient.get('/notifications', {
-        params: { limit, offset: currentOffset }
-      });
-      const data: Notification[] = res.data.data || res.data || [];
-      if (append) {
-        setNotifications(prev => [...prev, ...data]);
-      } else {
-        setNotifications(data);
+      const params: Record<string, string | number | boolean> = {
+        limit,
+        page: pageNumber,
+      };
+      if (activeFilter === 'unread') {
+        params.isRead = false;
+      } else if (activeFilter !== 'all') {
+        params.type = activeFilter;
       }
-      setHasMore(data.length === limit);
+      const res = await apiClient.get('/notifications', { params });
+      const data: Notification[] = res.data.data || res.data || [];
+      setNotifications(data);
+      setTotalPages(res.data.meta?.totalPages || Math.ceil((res.data.meta?.total || data.length) / limit) || 1);
+      setTotalItems(res.data.meta?.total || data.length);
     } catch {
       // handled by global interceptor
     } finally {
       setIsLoading(false);
-      setIsLoadingMore(false);
     }
-  }, []);
+  }, [activeFilter]);
 
   useEffect(() => {
-    fetchNotifications(0);
+    setPage(1);
+    fetchNotifications(1);
     fetchUnreadCount();
-  }, [fetchNotifications, fetchUnreadCount]);
+  }, [activeFilter, fetchNotifications, fetchUnreadCount]);
 
-  const handleLoadMore = () => {
-    const newOffset = offset + limit;
-    setOffset(newOffset);
-    fetchNotifications(newOffset, true);
-  };
+  useEffect(() => {
+    if (page > 1) {
+      fetchNotifications(page);
+    }
+  }, [page, fetchNotifications]);
 
   const handleMarkRead = async (id: string) => {
     try {
@@ -105,7 +120,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -141,6 +156,23 @@ export default function NotificationsPage() {
         </div>
       </div>
 
+      {/* Filter Tabs */}
+      <div className="flex bg-slate-100 p-1 rounded-xl w-full overflow-x-auto">
+        {filterTabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveFilter(tab.key)}
+            className={`flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
+              activeFilter === tab.key
+                ? 'bg-white shadow-sm text-indigo-600'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Notification List */}
       <div className="card overflow-hidden !p-0 shadow-sm border-slate-200">
         {isLoading ? (
@@ -161,9 +193,11 @@ export default function NotificationsPage() {
             <div className="mx-auto h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center">
               <Bell size={24} className="text-slate-400" />
             </div>
-            <p className="font-semibold text-slate-700">No notifications yet</p>
+            <p className="font-semibold text-slate-700">No notifications found</p>
             <p className="text-sm text-slate-500">
-              When you receive notifications, they will appear here.
+              {activeFilter !== 'all'
+                ? 'No notifications match this filter.'
+                : 'When you receive notifications, they will appear here.'}
             </p>
           </div>
         ) : (
@@ -212,23 +246,16 @@ export default function NotificationsPage() {
               })}
             </div>
 
-            {/* Load More */}
-            {hasMore && (
-              <div className="px-4 sm:px-6 py-4 border-t border-slate-100 text-center">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={isLoadingMore}
-                  className="btn btn-secondary h-10 px-6 font-bold text-sm"
-                >
-                  {isLoadingMore ? (
-                    <span className="flex items-center gap-2">
-                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
-                      Loading...
-                    </span>
-                  ) : (
-                    'Load More'
-                  )}
-                </button>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="px-4 sm:px-6 py-4 border-t border-slate-100">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  total={totalItems}
+                  limit={limit}
+                />
               </div>
             )}
           </>

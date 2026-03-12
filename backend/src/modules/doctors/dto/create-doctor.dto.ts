@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsEmail, IsOptional, IsArray, IsNumber, IsBoolean } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
 export class CreateDoctorDto {
     @ApiProperty({ example: 'firstName' })
@@ -53,4 +53,4 @@ export class CreateDoctorDto {
     isActive?: boolean;
 }
 
-export class UpdateDoctorDto extends CreateDoctorDto { }
+export class UpdateDoctorDto extends PartialType(CreateDoctorDto) { }

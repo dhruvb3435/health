@@ -1,5 +1,5 @@
 import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsBoolean, IsNumber } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { AppointmentStatus } from '../entities/appointment.entity';
 
 export class CreateAppointmentDto {
@@ -54,4 +54,4 @@ export class CreateAppointmentDto {
     meetingLink?: string;
 }
 
-export class UpdateAppointmentDto extends CreateAppointmentDto { }
+export class UpdateAppointmentDto extends PartialType(CreateAppointmentDto) { }

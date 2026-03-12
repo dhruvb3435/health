@@ -20,6 +20,7 @@ import { LaboratoryModule } from './modules/laboratory/laboratory.module';
 import { PharmacyModule } from './modules/pharmacy/pharmacy.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { StaffModule } from './modules/staff/staff.module';
+import { DepartmentsModule } from './modules/departments/departments.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { WardsModule } from './modules/wards/wards.module';
 import { OperationTheaterModule } from './modules/operation-theater/operation-theater.module';
@@ -64,6 +65,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     PharmacyModule,
     DashboardModule,
     StaffModule,
+    DepartmentsModule,
     InventoryModule,
     WardsModule,
     OperationTheaterModule,

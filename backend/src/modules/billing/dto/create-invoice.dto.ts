@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsArray, IsEnum, IsDateString, ValidateNested, IsNumber, IsDecimal } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { InvoiceStatus, PaymentMethod } from '../entities/invoice.entity';
 
 class LineItemDto {
@@ -86,4 +86,4 @@ export class CreateInvoiceDto {
     notes?: string;
 }
 
-export class UpdateInvoiceDto extends CreateInvoiceDto { }
+export class UpdateInvoiceDto extends PartialType(CreateInvoiceDto) { }

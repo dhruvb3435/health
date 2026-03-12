@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsNumber, IsDateString } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { InventoryType, InventoryStatus } from '../entities/inventory.entity';
 
 export class CreateInventoryDto {
@@ -74,4 +74,4 @@ export class CreateInventoryDto {
     supplier?: string;
 }
 
-export class UpdateInventoryDto extends CreateInventoryDto { }
+export class UpdateInventoryDto extends PartialType(CreateInventoryDto) { }
