@@ -28,6 +28,9 @@ import {
   FolderTree,
   Droplets,
   Siren,
+  ShieldCheck,
+  Truck,
+  FileOutput,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -47,6 +50,9 @@ const NAV_ITEMS = [
   { href: '/operation-theater', label: 'Operation Theater', icon: Scissors, feature: 'operation-theater' },
   { href: '/emergency', label: 'Emergency', icon: Siren, feature: 'emergency' },
   { href: '/blood-bank', label: 'Blood Bank', icon: Droplets, feature: 'blood-bank' },
+  { href: '/insurance', label: 'Insurance & TPA', icon: ShieldCheck, feature: 'insurance' },
+  { href: '/ambulance', label: 'Ambulance', icon: Truck, feature: 'ambulance' },
+  { href: '/discharge-summary', label: 'Discharge Summary', icon: FileOutput, feature: 'discharge-summary' },
   { href: '/billing', label: 'Billing', icon: Wallet, feature: 'billing' },
   { href: '/inventory', label: 'Inventory', icon: Package, feature: 'inventory' },
   { href: '/accounts', label: 'Accounts', icon: IndianRupee, feature: 'accounts' },

@@ -109,6 +109,9 @@ async function bootstrap() {
     .addTag('OPD Queue')
     .addTag('Blood Bank')
     .addTag('Emergency')
+    .addTag('Insurance')
+    .addTag('Ambulance')
+    .addTag('Discharge Summary')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

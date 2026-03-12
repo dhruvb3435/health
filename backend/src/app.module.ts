@@ -37,6 +37,9 @@ import { MailModule } from './modules/mail/mail.module';
 import { OpdQueueModule } from './modules/opd-queue/opd-queue.module';
 import { BloodBankModule } from './modules/blood-bank/blood-bank.module';
 import { EmergencyModule } from './modules/emergency/emergency.module';
+import { InsuranceModule } from './modules/insurance/insurance.module';
+import { AmbulanceModule } from './modules/ambulance/ambulance.module';
+import { DischargeSummaryModule } from './modules/discharge-summary/discharge-summary.module';
 
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
@@ -85,6 +88,9 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     OpdQueueModule,
     BloodBankModule,
     EmergencyModule,
+    InsuranceModule,
+    AmbulanceModule,
+    DischargeSummaryModule,
     // Rate Limiting — named throttlers allow per-route overrides via @Throttle({ name: ... })
     ThrottlerModule.forRoot([
       {

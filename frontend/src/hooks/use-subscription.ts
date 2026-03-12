@@ -28,6 +28,9 @@ export type FeatureKey =
     | 'help'
     | 'emergency'
     | 'blood-bank'
+    | 'insurance'
+    | 'ambulance'
+    | 'discharge-summary'
     | 'analytics';  // Enterprise
 
 type PlanTier = 'trial' | 'basic' | 'pro' | 'enterprise';
@@ -80,7 +83,10 @@ const planFeatures: Record<PlanTier, FeatureKey[]> = {
         'opd-queue',
         'admissions',
         'emergency',
-        'blood-bank'
+        'blood-bank',
+        'insurance',
+        'ambulance',
+        'discharge-summary'
     ],
     enterprise: [
         'dashboard',
@@ -106,6 +112,9 @@ const planFeatures: Record<PlanTier, FeatureKey[]> = {
         'compliance',
         'emergency',
         'blood-bank',
+        'insurance',
+        'ambulance',
+        'discharge-summary',
         'analytics'
     ],
 };
