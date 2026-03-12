@@ -18,7 +18,7 @@ import {
   Package,
   Building2,
   Microscope,
-  DollarSign,
+  IndianRupee,
   Shield,
   Bell,
   Settings,
@@ -26,6 +26,8 @@ import {
   Pill,
   Scissors,
   FolderTree,
+  Droplets,
+  Siren,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -43,9 +45,11 @@ const NAV_ITEMS = [
   { href: '/admissions', label: 'Admissions', icon: UserPlus, feature: 'admissions' },
   { href: '/wards', label: 'Wards', icon: Building2, feature: 'wards' },
   { href: '/operation-theater', label: 'Operation Theater', icon: Scissors, feature: 'operation-theater' },
+  { href: '/emergency', label: 'Emergency', icon: Siren, feature: 'emergency' },
+  { href: '/blood-bank', label: 'Blood Bank', icon: Droplets, feature: 'blood-bank' },
   { href: '/billing', label: 'Billing', icon: Wallet, feature: 'billing' },
   { href: '/inventory', label: 'Inventory', icon: Package, feature: 'inventory' },
-  { href: '/accounts', label: 'Accounts', icon: DollarSign, feature: 'accounts' },
+  { href: '/accounts', label: 'Accounts', icon: IndianRupee, feature: 'accounts' },
   { href: '/compliance', label: 'Compliance', icon: Shield, feature: 'compliance' },
   { href: '/notifications', label: 'Notifications', icon: Bell, feature: 'notifications' },
   { href: '/settings', label: 'Settings', icon: Settings, feature: 'settings' },

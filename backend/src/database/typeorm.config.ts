@@ -39,6 +39,8 @@ import { Payment } from '../modules/billing/entities/payment.entity';
 import { EmailVerificationToken } from '../modules/auth/entities/email-verification-token.entity';
 import { Department } from '../modules/departments/entities/department.entity';
 import { OpdQueue } from '../modules/opd-queue/entities/opd-queue.entity';
+import { BloodInventory, BloodRequest } from '../modules/blood-bank/entities/blood-bank.entity';
+import { EmergencyCase } from '../modules/emergency/entities/emergency.entity';
 
 const ENTITIES = [
   User, Patient, Doctor, Appointment, Prescription, MedicalRecord,
@@ -48,6 +50,7 @@ const ENTITIES = [
   Organization, Role, Permission,
   Plan, Subscription, FeatureLimit, OrganizationUsage, Payment,
   EmailVerificationToken, Department, OpdQueue,
+  BloodInventory, BloodRequest, EmergencyCase,
 ];
 
 export const typeormConfig = (configService: ConfigService): DataSourceOptions => {

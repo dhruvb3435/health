@@ -26,6 +26,8 @@ export type FeatureKey =
     | 'notifications'
     | 'settings'
     | 'help'
+    | 'emergency'
+    | 'blood-bank'
     | 'analytics';  // Enterprise
 
 type PlanTier = 'trial' | 'basic' | 'pro' | 'enterprise';
@@ -76,7 +78,9 @@ const planFeatures: Record<PlanTier, FeatureKey[]> = {
         'wards',
         'staff',
         'opd-queue',
-        'admissions'
+        'admissions',
+        'emergency',
+        'blood-bank'
     ],
     enterprise: [
         'dashboard',
@@ -100,6 +104,8 @@ const planFeatures: Record<PlanTier, FeatureKey[]> = {
         'operation-theater',
         'accounts',
         'compliance',
+        'emergency',
+        'blood-bank',
         'analytics'
     ],
 };
