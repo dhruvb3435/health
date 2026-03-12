@@ -36,6 +36,12 @@ export class CreateDepartmentsTable1772600000000 implements MigrationInterface {
       FOREIGN KEY ("parentDepartmentId") REFERENCES "departments"("id") ON DELETE SET NULL
     `);
 
+    // Fix staff.departmentId column type from varchar to uuid before adding FK
+    await queryRunner.query(`
+      ALTER TABLE "staff"
+      ALTER COLUMN "departmentId" TYPE uuid USING NULLIF("departmentId", '')::uuid
+    `);
+
     // Add foreign key from staff.departmentId to departments.id
     await queryRunner.query(`
       ALTER TABLE "staff"

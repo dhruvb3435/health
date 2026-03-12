@@ -12,7 +12,7 @@ import {
   Users,
   Calendar,
   Heart,
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   Bed,
   AlertCircle,
@@ -112,7 +112,7 @@ export default function DashboardPage() {
     {
       label: 'Monthly Revenue',
       value: `₹${(stats?.revenue || 0).toLocaleString()}`,
-      icon: DollarSign,
+      icon: IndianRupee,
       color: 'green',
     },
     {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { apiClient } from '@/lib/api-client';
-import { FileText, Plus, Search, Filter, MoreHorizontal, Download, DollarSign, CreditCard, X, Trash2, PlusCircle } from 'lucide-react';
+import { FileText, Plus, Search, Filter, MoreHorizontal, Download, IndianRupee, CreditCard, X, Trash2, PlusCircle } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
 import toast from 'react-hot-toast';
 import type { Invoice, Patient, Admission } from '@/types';
@@ -174,7 +174,7 @@ export default function BillingPage() {
         notes: `IPD Stay: ${stayDuration} days in ${patient.ward?.wardName || 'Ward'}.`,
         lineItems: [
           {
-            description: `Bed Charges (${stayDuration} days @ $${wardRate}/day)`,
+            description: `Bed Charges (${stayDuration} days @ \u20B9${wardRate}/day)`,
             quantity: stayDuration,
             unitPrice: wardRate,
             total: estimatedStayCharges
@@ -228,7 +228,7 @@ export default function BillingPage() {
               <h3 className="text-2xl md:text-3xl font-bold mt-1 font-display">$12,450.00</h3>
             </div>
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/20 flex items-center justify-center">
-              <DollarSign size={20} />
+              <IndianRupee size={20} />
             </div>
           </div>
         </div>
@@ -349,7 +349,7 @@ export default function BillingPage() {
                         </div>
                       </td>
                       <td className="px-4 sm:px-6 py-4 text-sm font-bold text-slate-900">
-                        ${invoice.totalAmount?.toLocaleString()}
+                        &#8377;{invoice.totalAmount?.toLocaleString()}
                         {/* Show status inline on mobile since Status column is hidden */}
                         <span className={`md:hidden ml-2 badge ${invoice.status === 'paid' ? 'badge-success' : 'badge-warning'
                           } font-bold text-[10px]`}>
@@ -441,7 +441,7 @@ export default function BillingPage() {
                     </td>
                     <td className="hidden sm:table-cell px-6 py-4">
                       <p className="text-sm font-bold text-slate-700">{adm.ward?.wardName}</p>
-                      <p className="text-[10px] text-slate-400 font-bold tracking-widest">${adm.ward?.pricePerDay || 0}/day</p>
+                      <p className="text-[10px] text-slate-400 font-bold tracking-widest">&#8377;{adm.ward?.pricePerDay || 0}/day</p>
                     </td>
                     <td className="hidden md:table-cell px-6 py-4">
                       <span className="text-sm font-bold text-indigo-600">
@@ -453,7 +453,7 @@ export default function BillingPage() {
                         onClick={() => handleGenerateIPDInvoice(adm.id)}
                         className="btn btn-secondary h-9 px-3 sm:px-4 text-xs gap-1.5 sm:gap-2 font-bold"
                       >
-                        <DollarSign size={14} />
+                        <IndianRupee size={14} />
                         <span className="hidden sm:inline">Invoice Stay</span>
                         <span className="sm:hidden">Invoice</span>
                       </button>
@@ -532,12 +532,12 @@ export default function BillingPage() {
                         <input type="number" required className="input h-10 text-sm" value={item.quantity} onChange={e => updateLineItem(idx, 'quantity', parseInt(e.target.value))} />
                       </div>
                       <div className="flex-1 space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Price ($)</label>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Price (&#8377;)</label>
                         <input type="number" required className="input h-10 text-sm" value={item.unitPrice} onChange={e => updateLineItem(idx, 'unitPrice', parseInt(e.target.value))} />
                       </div>
                       <div className="flex-1 space-y-1">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Total</label>
-                        <div className="h-10 flex items-center px-3 font-bold text-slate-900 border border-transparent self-end">${item.total.toLocaleString()}</div>
+                        <div className="h-10 flex items-center px-3 font-bold text-slate-900 border border-transparent self-end">&#8377;{item.total.toLocaleString()}</div>
                       </div>
                       <div className="flex items-end pb-2">
                         {formData.lineItems.length > 1 && (
@@ -562,11 +562,11 @@ export default function BillingPage() {
                 <div className="bg-slate-50/50 rounded-2xl p-6 space-y-3 border border-slate-100">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500 font-medium">Subtotal</span>
-                    <span className="font-bold text-slate-900">${totals.subtotal.toLocaleString()}</span>
+                    <span className="font-bold text-slate-900">&#8377;{totals.subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="text-slate-500 font-medium">Discount ($)</span>
+                      <span className="text-slate-500 font-medium">Discount (&#8377;)</span>
                     </div>
                     <input type="number" className="w-20 text-right bg-transparent border-b border-indigo-200 outline-none font-bold text-indigo-600" value={formData.discount} onChange={e => setFormData({ ...formData, discount: parseInt(e.target.value) || 0 })} />
                   </div>
@@ -576,7 +576,7 @@ export default function BillingPage() {
                   </div>
                   <div className="pt-3 mt-3 border-t border-slate-200 flex justify-between">
                     <span className="text-base font-bold text-slate-900 font-display">Grand Total</span>
-                    <span className="text-xl font-bold text-indigo-600 font-display">${totals.total.toLocaleString()}</span>
+                    <span className="text-xl font-bold text-indigo-600 font-display">&#8377;{totals.total.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

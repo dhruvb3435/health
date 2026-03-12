@@ -106,6 +106,7 @@ async function bootstrap() {
     .addTag('Subscriptions')
     .addTag('RBAC')
     .addTag('Onboarding')
+    .addTag('OPD Queue')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

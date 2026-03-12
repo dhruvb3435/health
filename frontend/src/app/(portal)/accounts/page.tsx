@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRequireRole } from '@/hooks/auth';
 import { apiClient } from '@/lib/api-client';
 import {
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   TrendingDown,
   PieChart,
@@ -246,7 +246,7 @@ export default function AccountsPage() {
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Revenue</p>
               <h3 className="text-2xl md:text-3xl font-bold mt-1 text-slate-900 font-display">
-                ${summary.totalRevenue.toLocaleString()}
+                &#8377;{summary.totalRevenue.toLocaleString()}
               </h3>
             </div>
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -260,7 +260,7 @@ export default function AccountsPage() {
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Expenses</p>
               <h3 className="text-2xl md:text-3xl font-bold mt-1 text-slate-900 font-display">
-                ${summary.totalExpenses.toLocaleString()}
+                &#8377;{summary.totalExpenses.toLocaleString()}
               </h3>
             </div>
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
@@ -274,7 +274,7 @@ export default function AccountsPage() {
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Net Profit</p>
               <h3 className={`text-2xl md:text-3xl font-bold mt-1 font-display ${summary.netProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                ${summary.netProfit.toLocaleString()}
+                &#8377;{summary.netProfit.toLocaleString()}
               </h3>
             </div>
             <div className={`h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center ${summary.netProfit >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
@@ -400,7 +400,7 @@ export default function AccountsPage() {
                         <p className="text-sm text-slate-600">{entry.patientName || '-'}</p>
                       </td>
                       <td className="px-4 sm:px-6 py-4">
-                        <p className="text-sm font-bold text-emerald-700">${entry.amount?.toLocaleString()}</p>
+                        <p className="text-sm font-bold text-emerald-700">&#8377;{entry.amount?.toLocaleString()}</p>
                       </td>
                       <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
                         <p className="text-sm text-slate-600">{new Date(entry.date || entry.createdAt).toLocaleDateString()}</p>
@@ -419,7 +419,7 @@ export default function AccountsPage() {
             {!isLoading && revenue.length === 0 && (
               <div className="py-20 text-center bg-white space-y-3">
                 <div className="mx-auto h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center">
-                  <DollarSign size={24} className="text-slate-400" />
+                  <IndianRupee size={24} className="text-slate-400" />
                 </div>
                 <p className="font-semibold text-slate-700">No revenue records found</p>
                 <p className="text-sm text-slate-500">
@@ -495,7 +495,7 @@ export default function AccountsPage() {
                         <p className="text-sm text-slate-600 truncate max-w-[200px]">{expense.description}</p>
                       </td>
                       <td className="px-4 sm:px-6 py-4">
-                        <p className="text-sm font-bold text-rose-700">${expense.amount?.toLocaleString()}</p>
+                        <p className="text-sm font-bold text-rose-700">&#8377;{expense.amount?.toLocaleString()}</p>
                       </td>
                       <td className="hidden lg:table-cell px-6 py-4">
                         <p className="text-sm text-slate-600">{expense.vendorName || '-'}</p>

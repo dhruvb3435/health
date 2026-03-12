@@ -38,6 +38,7 @@ import { OrganizationUsage } from '../modules/subscriptions/entities/organizatio
 import { Payment } from '../modules/billing/entities/payment.entity';
 import { EmailVerificationToken } from '../modules/auth/entities/email-verification-token.entity';
 import { Department } from '../modules/departments/entities/department.entity';
+import { OpdQueue } from '../modules/opd-queue/entities/opd-queue.entity';
 
 const ENTITIES = [
   User, Patient, Doctor, Appointment, Prescription, MedicalRecord,
@@ -46,7 +47,7 @@ const ENTITIES = [
   Expense, Revenue, ComplianceRecord, DataAccessLog,
   Organization, Role, Permission,
   Plan, Subscription, FeatureLimit, OrganizationUsage, Payment,
-  EmailVerificationToken, Department,
+  EmailVerificationToken, Department, OpdQueue,
 ];
 
 export const typeormConfig = (configService: ConfigService): DataSourceOptions => {

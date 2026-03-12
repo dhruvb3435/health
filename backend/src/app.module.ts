@@ -34,6 +34,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
 import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { MailModule } from './modules/mail/mail.module';
+import { OpdQueueModule } from './modules/opd-queue/opd-queue.module';
 
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
@@ -79,6 +80,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     OnboardingModule,
     NotificationsModule,
     MailModule,
+    OpdQueueModule,
     // Rate Limiting — named throttlers allow per-route overrides via @Throttle({ name: ... })
     ThrottlerModule.forRoot([
       {

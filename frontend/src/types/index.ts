@@ -624,6 +624,42 @@ export interface RadiologyRequest {
   updatedAt: string;
 }
 
+// ── OPD Queue ──
+
+export type QueueStatus = 'waiting' | 'in_consultation' | 'completed' | 'cancelled' | 'no_show';
+export type QueuePriority = 'normal' | 'urgent' | 'emergency';
+
+export interface OpdQueueEntry {
+  id: string;
+  organizationId: string;
+  patientId: string;
+  patient?: Patient;
+  doctorId: string;
+  doctor?: Doctor;
+  tokenNumber: number;
+  queueDate: string;
+  status: QueueStatus;
+  priority: QueuePriority;
+  checkinTime?: string;
+  consultationStartTime?: string;
+  consultationEndTime?: string;
+  appointmentId?: string;
+  notes?: string;
+  chiefComplaint?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QueueStats {
+  waiting: number;
+  inConsultation: number;
+  completed: number;
+  cancelled?: number;
+  noShow?: number;
+  total: number;
+  averageWaitMinutes?: number;
+}
+
 // ── Paginated Response ──
 
 export interface PaginatedResponse<T> {

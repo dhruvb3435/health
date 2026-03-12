@@ -65,6 +65,14 @@
     @apply bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 hover:border-slate-300;
   }
 
+  .btn-success {
+    @apply bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-500/30;
+  }
+
+  .btn-danger {
+    @apply bg-rose-600 text-white shadow-lg shadow-rose-500/20 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-500/30;
+  }
+
   .input {
     @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400;
   }

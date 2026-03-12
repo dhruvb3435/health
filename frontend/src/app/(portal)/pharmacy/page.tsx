@@ -238,7 +238,7 @@ export default function PharmacyPage() {
                             </div>
 
                             <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
-                                <span className="text-lg font-bold text-indigo-600">${medicine.sellingPrice || '0.00'}</span>
+                                <span className="text-lg font-bold text-indigo-600">&#8377;{medicine.sellingPrice || '0.00'}</span>
                                 <button
                                     className="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest"
                                     onClick={() => {
@@ -397,11 +397,11 @@ export default function PharmacyPage() {
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <p className="text-xs text-slate-500">Selling Price</p>
-                                        <p className="text-xl font-bold text-indigo-600">${selectedMedicine.sellingPrice}</p>
+                                        <p className="text-xl font-bold text-indigo-600">&#8377;{selectedMedicine.sellingPrice}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-xs text-slate-500">Purchase Price</p>
-                                        <p className="text-lg font-bold text-slate-700">${selectedMedicine.purchasePrice}</p>
+                                        <p className="text-lg font-bold text-slate-700">&#8377;{selectedMedicine.purchasePrice}</p>
                                     </div>
                                 </div>
                             </div>

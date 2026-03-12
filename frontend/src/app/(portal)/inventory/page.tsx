@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { apiClient } from '@/lib/api-client';
-import { Package, AlertTriangle, TrendingDown, Search, Filter, MoreHorizontal, Plus, X, Trash2, Calendar, DollarSign, Layers } from 'lucide-react';
+import { Package, AlertTriangle, TrendingDown, Search, Filter, MoreHorizontal, Plus, X, Trash2, Calendar, IndianRupee, Layers } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
 import toast from 'react-hot-toast';
 import type { InventoryItem } from '@/types';
@@ -343,7 +343,7 @@ export default function InventoryPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5"><DollarSign size={14} /> Unit Price ($)</label>
+                  <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5"><IndianRupee size={14} /> Unit Price (&#8377;)</label>
                   <input type="number" step="0.01" required className="input h-11" value={formData.unitPrice} onChange={e => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) })} />
                 </div>
 
