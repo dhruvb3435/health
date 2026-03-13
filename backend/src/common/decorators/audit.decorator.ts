@@ -7,4 +7,4 @@ export interface AuditOptions {
     entityType?: string;
 }
 
-export const Audit = (options: AuditOptions) => SetMetadata(AUDIT_KEY, options);
+export const Audit = (options: AuditOptions = {}) => SetMetadata(AUDIT_KEY, options);

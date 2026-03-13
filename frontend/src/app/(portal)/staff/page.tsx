@@ -17,6 +17,7 @@ export default function StaffPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -71,6 +72,8 @@ export default function StaffPage() {
 
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await apiClient.post('/staff', formData);
       toast.success('Staff member added successfully');
@@ -91,6 +94,8 @@ export default function StaffPage() {
       fetchStaff(search, page);
     } catch {
       // handled by global interceptor
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -349,9 +354,10 @@ export default function StaffPage() {
               <button
                 type="submit"
                 onClick={handleAddStaff}
-                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold"
+                disabled={isSubmitting}
+                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold disabled:opacity-50"
               >
-                Create Staff Member
+                {isSubmitting ? 'Creating...' : 'Create Staff Member'}
               </button>
             </div>
           </div>

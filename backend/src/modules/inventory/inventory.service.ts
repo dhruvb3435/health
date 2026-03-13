@@ -4,25 +4,28 @@ import { Repository, Like } from 'typeorm';
 import { Inventory, InventoryStatus, InventoryType } from './entities/inventory.entity';
 import { PaginationQueryDto, PaginatedResponse } from '../../common/dto/pagination.dto';
 import { CreateInventoryDto, UpdateInventoryDto } from './dto/create-inventory.dto';
+import { TenantService } from '../../common/services/tenant.service';
 
 @Injectable()
 export class InventoryService {
   constructor(
     @InjectRepository(Inventory)
     private readonly inventoryRepo: Repository<Inventory>,
+    private readonly tenantService: TenantService,
   ) { }
 
   async findAll(query: PaginationQueryDto): Promise<PaginatedResponse<Inventory>> {
     const { page = 1, limit = 20, search } = query;
     const skip = (page - 1) * limit;
+    const organizationId = this.tenantService.getTenantId();
 
     const where = search
       ? [
-        { itemName: Like(`%${search}%`) },
-        { itemCode: Like(`%${search}%`) },
-        { category: Like(`%${search}%`) },
+        { itemName: Like(`%${search}%`), organizationId },
+        { itemCode: Like(`%${search}%`), organizationId },
+        { category: Like(`%${search}%`), organizationId },
       ]
-      : {};
+      : { organizationId };
 
     const [data, total] = await this.inventoryRepo.findAndCount({
       where,
@@ -43,8 +46,9 @@ export class InventoryService {
   }
 
   async findOne(id: string) {
+    const organizationId = this.tenantService.getTenantId();
     const item = await this.inventoryRepo.findOne({
-      where: { id },
+      where: { id, organizationId },
     });
 
     if (!item) {
@@ -55,7 +59,8 @@ export class InventoryService {
   }
 
   async create(createInventoryDto: CreateInventoryDto) {
-    const item = this.inventoryRepo.create(createInventoryDto);
+    const organizationId = this.tenantService.getTenantId();
+    const item = this.inventoryRepo.create({ ...createInventoryDto, organizationId });
     return this.inventoryRepo.save(item);
   }
 
@@ -84,20 +89,24 @@ export class InventoryService {
   }
 
   async getLowStockItems() {
+    const organizationId = this.tenantService.getTenantId();
     return this.inventoryRepo.find({
-      where: { status: InventoryStatus.LOW_STOCK },
+      where: { status: InventoryStatus.LOW_STOCK, organizationId },
     });
   }
 
   async getExpiredItems() {
+    const organizationId = this.tenantService.getTenantId();
     return this.inventoryRepo.find({
-      where: { status: InventoryStatus.EXPIRED },
+      where: { status: InventoryStatus.EXPIRED, organizationId },
     });
   }
 
   async getStockValue() {
+    const organizationId = this.tenantService.getTenantId();
     const { sum } = await this.inventoryRepo
       .createQueryBuilder('inventory')
+      .where('inventory.organizationId = :organizationId', { organizationId })
       .select('SUM(inventory.quantity * inventory.unitCost)', 'sum')
       .getRawOne();
     return parseFloat(sum || '0');

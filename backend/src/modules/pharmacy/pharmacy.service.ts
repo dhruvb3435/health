@@ -57,6 +57,10 @@ export class PharmacyService {
     }
 
     async dispense(id: string, quantity: number): Promise<Medicine> {
+        if (!quantity || quantity <= 0) {
+            throw new BadRequestException('Quantity must be a positive number');
+        }
+
         const medicine = await this.findOne(id);
 
         if (medicine.expiryDate && new Date(medicine.expiryDate) < new Date()) {

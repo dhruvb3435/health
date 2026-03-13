@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, DataSource } from 'typeorm';
 import { Admission, AdmissionStatus } from './entities/admission.entity';
 import { Ward, Bed, BedStatus } from '../wards/entities/ward.entity';
 import { CreateAdmissionDto, UpdateVitalsDto, AddNursingNoteDto, DischargeAdmissionDto } from './dto/create-admission.dto';
@@ -17,6 +17,7 @@ export class AdmissionsService {
         @InjectRepository(Bed)
         private readonly bedRepo: Repository<Bed>,
         private readonly tenantService: TenantService,
+        private readonly dataSource: DataSource,
     ) { }
 
     async findAll(query: PaginationQueryDto): Promise<PaginatedResponse<Admission>> {
@@ -75,42 +76,44 @@ export class AdmissionsService {
             throw new BadRequestException('Admission date cannot be in the future');
         }
 
-        // Check ward capacity (filter by org to prevent cross-tenant access)
-        const ward = await this.wardRepo.findOne({ where: { id: wardId, organizationId } });
-        if (!ward) throw new NotFoundException('Ward not found');
-        if (ward.occupiedBeds >= ward.totalBeds) {
-            throw new BadRequestException(
-                `Ward "${ward.wardName}" is at full capacity (${ward.occupiedBeds}/${ward.totalBeds} beds occupied)`,
-            );
-        }
+        // Run admission + bed/ward updates in a transaction to prevent inconsistent state
+        return await this.dataSource.transaction(async (manager) => {
+            // Check ward capacity (filter by org to prevent cross-tenant access)
+            const ward = await manager.findOne(Ward, { where: { id: wardId, organizationId } });
+            if (!ward) throw new NotFoundException('Ward not found');
+            if (ward.occupiedBeds >= ward.totalBeds) {
+                throw new BadRequestException(
+                    `Ward "${ward.wardName}" is at full capacity (${ward.occupiedBeds}/${ward.totalBeds} beds occupied)`,
+                );
+            }
 
-        // Check bed availability (filter by org)
-        const bed = await this.bedRepo.findOne({ where: { id: bedId, organizationId } });
-        if (!bed) throw new NotFoundException('Bed not found');
-        if (bed.status !== BedStatus.AVAILABLE) {
-            throw new BadRequestException('Bed is not available');
-        }
+            // Check bed availability (filter by org)
+            const bed = await manager.findOne(Bed, { where: { id: bedId, organizationId } });
+            if (!bed) throw new NotFoundException('Bed not found');
+            if (bed.status !== BedStatus.AVAILABLE) {
+                throw new BadRequestException('Bed is not available');
+            }
 
-        // Create admission + update bed/ward atomically
-        const admission = this.admissionRepo.create({
-            ...createAdmissionDto,
-            admissionDate,
-            organizationId,
+            // Create admission
+            const admission = manager.create(Admission, {
+                ...createAdmissionDto,
+                admissionDate,
+                organizationId,
+            });
+            const savedAdmission = await manager.save(admission);
+
+            // Update bed status
+            bed.status = BedStatus.OCCUPIED;
+            bed.assignedPatientId = createAdmissionDto.patientId;
+            bed.assignedDate = new Date();
+            await manager.save(bed);
+
+            // Update ward occupancy
+            ward.occupiedBeds += 1;
+            await manager.save(ward);
+
+            return savedAdmission;
         });
-
-        const savedAdmission = await this.admissionRepo.save(admission);
-
-        // Update bed status
-        bed.status = BedStatus.OCCUPIED;
-        bed.assignedPatientId = createAdmissionDto.patientId;
-        bed.assignedDate = new Date();
-        await this.bedRepo.save(bed);
-
-        // Update ward occupancy
-        ward.occupiedBeds += 1;
-        await this.wardRepo.save(ward);
-
-        return savedAdmission;
     }
 
     async updateVitals(id: string, updateVitalsDto: UpdateVitalsDto) {
@@ -141,32 +144,35 @@ export class AdmissionsService {
             throw new BadRequestException('Patient already discharged');
         }
 
-        // Update admission record
-        admission.status = AdmissionStatus.DISCHARGED;
-        admission.dischargeDate = new Date(dischargeDto.dischargeDate);
-        admission.dischargeSummary = dischargeDto.dischargeSummary;
-        admission.dischargePlan = dischargeDto.dischargePlan;
-
-        await this.admissionRepo.save(admission);
-
-        // Free the bed (filter by org)
         const organizationId = this.tenantService.getTenantId();
-        const bed = await this.bedRepo.findOne({ where: { id: admission.bedId, organizationId } });
-        if (bed) {
-            bed.status = BedStatus.AVAILABLE;
-            bed.assignedPatientId = null;
-            bed.assignedDate = null;
-            await this.bedRepo.save(bed);
-        }
 
-        // Update ward occupancy (filter by org)
-        const ward = await this.wardRepo.findOne({ where: { id: admission.wardId, organizationId } });
-        if (ward) {
-            ward.occupiedBeds = Math.max(0, ward.occupiedBeds - 1);
-            await this.wardRepo.save(ward);
-        }
+        // Run discharge + bed/ward updates in a transaction
+        return await this.dataSource.transaction(async (manager) => {
+            // Update admission record
+            admission.status = AdmissionStatus.DISCHARGED;
+            admission.dischargeDate = new Date(dischargeDto.dischargeDate);
+            admission.dischargeSummary = dischargeDto.dischargeSummary;
+            admission.dischargePlan = dischargeDto.dischargePlan;
+            await manager.save(admission);
 
-        return admission;
+            // Free the bed
+            const bed = await manager.findOne(Bed, { where: { id: admission.bedId, organizationId } });
+            if (bed) {
+                bed.status = BedStatus.AVAILABLE;
+                bed.assignedPatientId = null;
+                bed.assignedDate = null;
+                await manager.save(bed);
+            }
+
+            // Update ward occupancy
+            const ward = await manager.findOne(Ward, { where: { id: admission.wardId, organizationId } });
+            if (ward) {
+                ward.occupiedBeds = Math.max(0, ward.occupiedBeds - 1);
+                await manager.save(ward);
+            }
+
+            return admission;
+        });
     }
 
     async getBillingInfo(id: string) {

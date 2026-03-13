@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, UseGuards } from '@nestjs/common';
 import { ComplianceService } from './compliance.service';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -9,6 +9,11 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @Controller('compliance')
 export class ComplianceController {
   constructor(private complianceService: ComplianceService) {}
+
+  @Post('records')
+  async createComplianceRecord(@Body() body: any) {
+    return this.complianceService.createComplianceRecord(body);
+  }
 
   @Get('records')
   async getComplianceRecords(

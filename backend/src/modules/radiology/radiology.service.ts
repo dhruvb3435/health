@@ -34,10 +34,12 @@ export class RadiologyService {
   }
 
   async getPendingReports() {
-    return this.radiologyRepository.find({ where: { status: ImagingStatus.PENDING } });
+    const organizationId = this.tenantService.getTenantId();
+    return this.radiologyRepository.find({ where: { status: ImagingStatus.PENDING, organizationId } });
   }
 
   async getCompletedReports() {
-    return this.radiologyRepository.find({ where: { status: ImagingStatus.COMPLETED } });
+    const organizationId = this.tenantService.getTenantId();
+    return this.radiologyRepository.find({ where: { status: ImagingStatus.COMPLETED, organizationId } });
   }
 }

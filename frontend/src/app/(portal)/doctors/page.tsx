@@ -27,6 +27,7 @@ export default function DoctorsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [specializationFilter, setSpecializationFilter] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Profile/edit modal state
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
@@ -98,6 +99,8 @@ export default function DoctorsPage() {
 
   const handleCreateDoctor = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await apiClient.post('/doctors', formData);
       toast.success('Doctor registered successfully');
@@ -117,6 +120,8 @@ export default function DoctorsPage() {
       fetchDoctors(search, page);
     } catch {
       // handled by global interceptor
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -398,7 +403,7 @@ export default function DoctorsPage() {
 
               <div className="flex gap-4 pt-4 sticky bottom-0 bg-white">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary flex-1 h-12">Cancel</button>
-                <button type="submit" className="btn btn-primary flex-1 h-12 shadow-indigo-100">Register Doctor</button>
+                <button type="submit" disabled={isSubmitting} className="btn btn-primary flex-1 h-12 shadow-indigo-100 disabled:opacity-50">{isSubmitting ? 'Registering...' : 'Register Doctor'}</button>
               </div>
             </form>
           </div>

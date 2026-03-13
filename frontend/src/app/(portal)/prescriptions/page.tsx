@@ -15,6 +15,7 @@ export default function PrescriptionsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
 
@@ -103,6 +104,8 @@ export default function PrescriptionsPage() {
 
   const handleCreatePrescription = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await apiClient.post('/prescriptions', formData);
       toast.success('Prescription issued successfully');
@@ -118,6 +121,8 @@ export default function PrescriptionsPage() {
       fetchPrescriptions(search, page);
     } catch {
       // handled by global interceptor
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -358,9 +363,10 @@ export default function PrescriptionsPage() {
               <button
                 type="submit"
                 onClick={handleCreatePrescription}
-                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold"
+                disabled={isSubmitting}
+                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold disabled:opacity-50"
               >
-                Issue Prescription
+                {isSubmitting ? 'Issuing...' : 'Issue Prescription'}
               </button>
             </div>
           </div>

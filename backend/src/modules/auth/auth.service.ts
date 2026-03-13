@@ -276,8 +276,22 @@ export class AuthService {
     };
 
     const prefix = rolePrefix[role] || 'USR';
-    // Scope count to the organization to prevent cross-org ID leakage.
-    const count = await this.usersRepository.count({ where: { organizationId } });
-    return `${prefix}-${String(count + 1).padStart(6, '0')}`;
+
+    // Use MAX-based approach to avoid race condition with count-based IDs.
+    // Find the highest existing numeric suffix for this prefix+org, then increment.
+    const result = await this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.organizationId = :organizationId', { organizationId })
+      .andWhere('user.userId LIKE :prefix', { prefix: `${prefix}-%` })
+      .select('MAX(user.userId)', 'maxId')
+      .getRawOne();
+
+    let nextNumber = 1;
+    if (result?.maxId) {
+      const numericPart = result.maxId.split('-')[1];
+      nextNumber = parseInt(numericPart, 10) + 1;
+    }
+
+    return `${prefix}-${String(nextNumber).padStart(6, '0')}`;
   }
 }

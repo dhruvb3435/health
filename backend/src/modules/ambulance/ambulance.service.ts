@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import {
   Ambulance,
   AmbulanceTrip,
@@ -45,6 +45,7 @@ export class AmbulanceService {
     @InjectRepository(AmbulanceTrip)
     private readonly tripRepo: Repository<AmbulanceTrip>,
     private readonly tenantService: TenantService,
+    private readonly dataSource: DataSource,
   ) {}
 
   // ── Fleet management ──────────────────────────────────────────────────────
@@ -269,30 +270,28 @@ export class AmbulanceService {
 
     const tripNumber = await this.generateTripNumber(organizationId);
 
-    const trip = this.tripRepo.create({
-      organizationId,
-      ambulanceId: dto.ambulanceId,
-      tripNumber,
-      patientId: dto.patientId ?? null,
-      patientName: dto.patientName,
-      patientContact: dto.patientContact ?? null,
-      pickupLocation: dto.pickupLocation,
-      dropLocation: dto.dropLocation,
-      tripType: dto.tripType,
-      priority: dto.priority,
-      status: TripStatus.DISPATCHED,
-      dispatchTime: new Date(),
-      emergencyCaseId: dto.emergencyCaseId ?? null,
+    return await this.dataSource.transaction(async (manager) => {
+      const trip = manager.create(AmbulanceTrip, {
+        organizationId,
+        ambulanceId: dto.ambulanceId,
+        tripNumber,
+        patientId: dto.patientId ?? null,
+        patientName: dto.patientName,
+        patientContact: dto.patientContact ?? null,
+        pickupLocation: dto.pickupLocation,
+        dropLocation: dto.dropLocation,
+        tripType: dto.tripType,
+        priority: dto.priority,
+        status: TripStatus.DISPATCHED,
+        dispatchTime: new Date(),
+        emergencyCaseId: dto.emergencyCaseId ?? null,
+      });
+
+      ambulance.status = AmbulanceStatus.ON_TRIP;
+      await manager.save(ambulance);
+
+      return manager.save(trip);
     });
-
-    // Mark ambulance as on_trip — both saves happen sequentially.
-    // A true transaction is not used here to keep the service portable
-    // (no DataSource injection needed), but if an atomic guarantee is
-    // required this can be wrapped with a QueryRunner.
-    ambulance.status = AmbulanceStatus.ON_TRIP;
-    await this.ambulanceRepo.save(ambulance);
-
-    return this.tripRepo.save(trip);
   }
 
   /**
@@ -348,10 +347,13 @@ export class AmbulanceService {
     if (TERMINAL_TRIP_STATUSES.has(dto.status)) {
       trip.completionTime = now;
 
-      // Release the ambulance back to available once trip is closed
-      const ambulance = await this.findAmbulanceOrFail(trip.ambulanceId, organizationId);
-      ambulance.status = AmbulanceStatus.AVAILABLE;
-      await this.ambulanceRepo.save(ambulance);
+      // Release the ambulance and save trip atomically
+      return await this.dataSource.transaction(async (manager) => {
+        const ambulance = await this.findAmbulanceOrFail(trip.ambulanceId, organizationId);
+        ambulance.status = AmbulanceStatus.AVAILABLE;
+        await manager.save(ambulance);
+        return manager.save(trip);
+      });
     }
 
     return this.tripRepo.save(trip);

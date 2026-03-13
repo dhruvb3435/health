@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository, MoreThanOrEqual, Between } from 'typeorm';
 import { Patient } from '../patients/entities/patient.entity';
 import { Doctor } from '../doctors/entities/doctor.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
@@ -35,8 +35,10 @@ export class DashboardService {
 
     async getStats() {
         const organizationId = this.tenantService.getTenantId();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const tomorrowStart = new Date(todayStart);
+        tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
         const [
             totalPatients, totalDoctors, totalAppointments,
@@ -45,7 +47,7 @@ export class DashboardService {
             this.patientRepo.count({ where: { organizationId } }),
             this.doctorRepo.count({ where: { organizationId } }),
             this.appointmentRepo.count({ where: { organizationId } }),
-            this.appointmentRepo.count({ where: { organizationId, appointmentDate: today } }),
+            this.appointmentRepo.count({ where: { organizationId, appointmentDate: Between(todayStart, tomorrowStart) } }),
             this.staffRepo.count({ where: { organizationId, status: 'active' as any } }),
             this.admissionRepo.count({ where: { organizationId, status: 'admitted' as any } }),
         ]);
@@ -129,8 +131,8 @@ export class DashboardService {
 
         return recentAppointments.map((app) => ({
             id: app.id,
-            patientName: `${app.patient.user?.firstName || 'Unknown'} ${app.patient.user?.lastName || ''}`,
-            doctorName: `Dr. ${app.doctor.user?.firstName || 'Unknown'}`,
+            patientName: `${app.patient?.user?.firstName || 'Unknown'} ${app.patient?.user?.lastName || ''}`.trim(),
+            doctorName: `Dr. ${app.doctor?.user?.firstName || 'Unknown'}`,
             date: app.appointmentDate,
             time: app.appointmentTime,
             status: app.status,

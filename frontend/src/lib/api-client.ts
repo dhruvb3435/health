@@ -46,6 +46,20 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Mutex for token refresh to prevent race conditions when multiple
+// requests receive 401 simultaneously
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+function addRefreshSubscriber(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
 // Handle token refresh on 401
 apiClient.interceptors.response.use(
   (response) => response,
@@ -53,11 +67,9 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      console.log('401 Unauthorized detected. Attempting token refresh...');
       const refreshToken = localStorage.getItem('refreshToken');
 
       if (!refreshToken) {
-        console.warn('No refresh token found. Redirecting to login.');
         if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth/')) {
           window.location.replace('/auth/login');
         }
@@ -66,30 +78,46 @@ apiClient.interceptors.response.use(
 
       originalRequest._retry = true;
 
+      // If a refresh is already in progress, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken: string) => {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            resolve(apiClient(originalRequest));
+          });
+        });
+      }
+
+      isRefreshing = true;
+
       try {
-        const response = await axios.post(`${API_URL}/auth/refresh`, {
+        const response = await axios.post<{ accessToken: string }>(`${API_URL}/auth/refresh`, {
           refreshToken,
         });
 
         const newAccessToken = response.data.accessToken;
-        console.log('Token refreshed successfully.');
         localStorage.setItem('accessToken', newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
+        // Notify all queued requests with the new token
+        onRefreshed(newAccessToken);
+
         return apiClient(originalRequest);
       } catch (refreshError: any) {
-        console.error('Token refresh failed:', refreshError.response?.data?.message || refreshError.message);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        // Clear queued requests
+        refreshSubscribers = [];
         if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth/')) {
           window.location.replace('/auth/login');
         }
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
     if (error.response?.status === 402) {
-      console.warn('Subscription expired (402). Redirecting to subscription-expired page.');
       if (typeof window !== 'undefined') {
         window.location.replace('/subscription-expired');
       }

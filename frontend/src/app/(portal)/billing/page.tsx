@@ -18,6 +18,7 @@ export default function BillingPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [activeTab, setActiveTab] = useState<'invoices' | 'admissions'>('invoices');
   const [activeAdmissions, setActiveAdmissions] = useState<Admission[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -130,6 +131,8 @@ export default function BillingPage() {
 
   const handleCreateInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       const payload = {
         ...formData,
@@ -155,6 +158,8 @@ export default function BillingPage() {
       fetchInvoices(search, page);
     } catch {
       // handled by global interceptor
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -225,7 +230,9 @@ export default function BillingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-indigo-100 text-xs font-bold uppercase tracking-widest">Total Outstanding</p>
-              <h3 className="text-2xl md:text-3xl font-bold mt-1 font-display">$12,450.00</h3>
+              <h3 className="text-2xl md:text-3xl font-bold mt-1 font-display">
+                &#8377;{invoices.reduce((sum, inv) => sum + (inv.dueAmount || 0), 0).toLocaleString()}
+              </h3>
             </div>
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/20 flex items-center justify-center">
               <IndianRupee size={20} />
@@ -235,8 +242,10 @@ export default function BillingPage() {
         <div className="card bg-emerald-600 text-white border-none shadow-emerald-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-emerald-100 text-xs font-bold uppercase tracking-widest">Monthly Revenue</p>
-              <h3 className="text-2xl md:text-3xl font-bold mt-1 font-display">$45,820.00</h3>
+              <p className="text-emerald-100 text-xs font-bold uppercase tracking-widest">Total Revenue</p>
+              <h3 className="text-2xl md:text-3xl font-bold mt-1 font-display">
+                &#8377;{invoices.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0).toLocaleString()}
+              </h3>
             </div>
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/20 flex items-center justify-center">
               <CreditCard size={20} />
@@ -246,8 +255,10 @@ export default function BillingPage() {
         <div className="card bg-white border-slate-200 shadow-sm sm:col-span-2 lg:col-span-1 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Pending Approvals</p>
-              <h3 className="text-2xl md:text-3xl font-bold mt-1 text-slate-900 font-display">18</h3>
+              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Pending Invoices</p>
+              <h3 className="text-2xl md:text-3xl font-bold mt-1 text-slate-900 font-display">
+                {invoices.filter(inv => inv.status === 'pending').length}
+              </h3>
             </div>
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
               <FileText size={20} />
@@ -474,11 +485,11 @@ export default function BillingPage() {
 
       {/* Create Invoice Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-labelledby="create-invoice-title">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
             <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 shrink-0">
               <div>
-                <h2 className="text-xl font-bold text-slate-900 font-display">Create Invoice</h2>
+                <h2 id="create-invoice-title" className="text-xl font-bold text-slate-900 font-display">Create Invoice</h2>
                 <p className="text-sm text-slate-500">Generate a new billing record for patient</p>
               </div>
               <button
@@ -585,11 +596,12 @@ export default function BillingPage() {
             <div className="px-6 sm:px-8 py-5 sm:py-6 border-t border-slate-100 bg-white flex gap-3 sm:gap-4 shrink-0">
               <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary flex-1 h-12 font-bold">Cancel</button>
               <button
-                type="submit"
+                type="button"
                 onClick={handleCreateInvoice}
-                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold"
+                disabled={isSubmitting}
+                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold disabled:opacity-50"
               >
-                Finalize & Save
+                {isSubmitting ? 'Saving...' : 'Finalize & Save'}
               </button>
             </div>
           </div>

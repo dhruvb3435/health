@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Query, Param, Body, UseGuards } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -23,6 +23,22 @@ export class AccountsController {
   ) {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     return this.accountsService.getExpenses(skip, parseInt(limit));
+  }
+
+  @Post('expenses')
+  @ApiOperation({ summary: 'Create a new expense' })
+  @Permissions('accounts:write')
+  @Audit({ action: 'Create Expense', entityType: 'Account' })
+  async createExpense(@Body() body: any) {
+    return this.accountsService.createExpense(body);
+  }
+
+  @Delete('expenses/:id')
+  @ApiOperation({ summary: 'Delete an expense' })
+  @Permissions('accounts:write')
+  @Audit({ action: 'Delete Expense', entityType: 'Account' })
+  async deleteExpense(@Param('id') id: string) {
+    return this.accountsService.deleteExpense(id);
   }
 
   @Get('revenue')

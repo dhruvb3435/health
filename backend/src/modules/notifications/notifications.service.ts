@@ -62,7 +62,7 @@ export class NotificationsService {
             { id, organizationId },
             { isRead: true },
         );
-        return this.notificationRepo.findOne({ where: { id } });
+        return this.notificationRepo.findOne({ where: { id, organizationId } });
     }
 
     async markAllAsRead(organizationId: string, userId?: string): Promise<{ affected: number }> {

@@ -32,9 +32,12 @@ export class BillingService {
 
     async create(createInvoiceDto: CreateInvoiceDto) {
         const organizationId = this.tenantService.getTenantId();
+        // Calculate dueAmount properly: totalAmount minus any paidAmount from DTO
+        const paidAmount = (createInvoiceDto as any).paidAmount || 0;
+        const dueAmount = createInvoiceDto.totalAmount - paidAmount;
         const invoice = this.invoiceRepository.create({
             ...createInvoiceDto,
-            dueAmount: createInvoiceDto.totalAmount, // Initially, full amount is due
+            dueAmount: Math.max(0, dueAmount),
             organizationId,
         });
         const savedInvoice = await this.invoiceRepository.save(invoice);
@@ -67,6 +70,6 @@ export class BillingService {
 
     async remove(id: string) {
         const invoice = await this.findOne(id);
-        return this.invoiceRepository.remove(invoice);
+        return this.invoiceRepository.softRemove(invoice);
     }
 }

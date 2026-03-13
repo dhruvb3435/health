@@ -141,12 +141,16 @@ export default function DashboardPage() {
 
   // Dynamically calculate appointment status from actual data
   const appointmentStatus = recentActivity.length > 0 ? [
-    { name: 'Completed', value: recentActivity.filter((a) => a.status === 'completed').length || 1, color: '#10b981' },
-    { name: 'Pending', value: recentActivity.filter((a) => a.status === 'scheduled').length || 1, color: '#f59e0b' },
-    { name: 'Cancelled', value: recentActivity.filter((a) => a.status === 'cancelled').length || 1, color: '#ef4444' },
-  ] : [
+    { name: 'Completed', value: recentActivity.filter((a) => a.status === 'completed').length, color: '#10b981' },
+    { name: 'Pending', value: recentActivity.filter((a) => a.status === 'scheduled').length, color: '#f59e0b' },
+    { name: 'Cancelled', value: recentActivity.filter((a) => a.status === 'cancelled').length, color: '#ef4444' },
+  ].filter(item => item.value > 0) : [
     { name: 'No Data', value: 1, color: '#e5e7eb' },
   ];
+  // Fallback if all statuses are 0 (e.g., all are 'in_progress' or other status)
+  if (recentActivity.length > 0 && appointmentStatus.length === 0) {
+    appointmentStatus.push({ name: 'Other', value: recentActivity.length, color: '#6366f1' });
+  }
 
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-10">

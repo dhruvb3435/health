@@ -38,17 +38,18 @@ export default function DashboardLayout({
     // 2. Check subscription status and sync with middleware cookie
     apiClient.get('/subscriptions/current')
       .then(res => {
-        const status = res.data.status;
+        const status = res.data?.status;
         if (status === 'expired' || status === 'past_due' || status === 'cancelled') {
           document.cookie = `subscription-status=expired; path=/; max-age=${60 * 60 * 24 * 7}`; // 1 week
           router.replace('/subscription-expired');
-        } else {
-          // Clear cookie if active
+        } else if (status) {
+          // Only clear cookie if we got a valid response with a non-expired status
           document.cookie = 'subscription-status=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         }
       })
-      .catch(err => {
-        console.error('Failed to fetch subscription status', err);
+      .catch(() => {
+        // On error, clear stale cookie to avoid permanently blocking users
+        document.cookie = 'subscription-status=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       });
   }, [user, router]);
 

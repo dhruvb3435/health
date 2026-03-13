@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Check, X as XIcon } from 'lucide-react';
@@ -32,22 +32,20 @@ export default function RegisterPage() {
     confirmPassword: '',
   });
 
-  // Auto-generate slug from organization name
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      organizationSlug: slugify(prev.organizationName),
-    }));
-  }, [formData.organizationName]);
+  // Slug is auto-generated in handleInputChange
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      // Auto-generate slug when organization name changes
+      if (name === 'organizationName') {
+        updated.organizationSlug = slugify(value);
+      }
+      return updated;
+    });
   };
 
   // Password validation

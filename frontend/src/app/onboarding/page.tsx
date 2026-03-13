@@ -200,6 +200,8 @@ function DemoStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }
         try {
             const res = await apiClient.post('/onboarding/generate-demo');
             setResult(res.data.created);
+            // Mark demo step as complete in backend so it can't be re-run
+            await apiClient.put('/onboarding/progress', { step: 'demo', metadata: { demoGenerated: true } }).catch(() => {});
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to generate demo data. You may already have data.');
         } finally {

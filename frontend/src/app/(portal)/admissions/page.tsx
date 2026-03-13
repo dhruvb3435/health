@@ -28,6 +28,7 @@ export default function AdmissionsPage() {
     const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
     const [isDischargeModalOpen, setIsDischargeModalOpen] = useState(false);
     const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form data for admission
     // ... (omitted for brevity in prompt, but I should keep it contextually correct)
@@ -105,8 +106,9 @@ export default function AdmissionsPage() {
 
     const handleAdmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         try {
-            // Generate a random-ish admission ID for now (backend should handle this ideally)
             const admissionId = `ADM-${Math.floor(1000 + Math.random() * 9000)}`;
             await apiClient.post('/admissions', { ...admissionForm, admissionId });
             toast.success('Patient admitted successfully');
@@ -114,12 +116,15 @@ export default function AdmissionsPage() {
             fetchAdmissions();
         } catch {
             // handled by global interceptor
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleUpdateVitals = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedAdmission) return;
+        if (!selectedAdmission || isSubmitting) return;
+        setIsSubmitting(true);
         try {
             await apiClient.patch(`/admissions/${selectedAdmission.id}/vitals`, {
                 ...vitalsForm,
@@ -130,12 +135,15 @@ export default function AdmissionsPage() {
             fetchAdmissions();
         } catch {
             // handled by global interceptor
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleDischarge = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedAdmission) return;
+        if (!selectedAdmission || isSubmitting) return;
+        setIsSubmitting(true);
         try {
             await apiClient.post(`/admissions/${selectedAdmission.id}/discharge`, dischargeForm);
             toast.success('Patient discharged successfully');
@@ -143,6 +151,8 @@ export default function AdmissionsPage() {
             fetchAdmissions();
         } catch {
             // handled by global interceptor
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -414,7 +424,7 @@ export default function AdmissionsPage() {
 
                             <div className="flex gap-4 pt-4">
                                 <button type="button" onClick={() => setIsAdmitModalOpen(false)} className="btn btn-secondary flex-1 h-12">Cancel</button>
-                                <button type="submit" className="btn btn-primary flex-1 h-12">Submit Admission</button>
+                                <button type="submit" disabled={isSubmitting} className="btn btn-primary flex-1 h-12 disabled:opacity-50">{isSubmitting ? 'Submitting...' : 'Submit Admission'}</button>
                             </div>
                         </form>
                     </div>
@@ -478,7 +488,7 @@ export default function AdmissionsPage() {
                             </div>
                             <div className="flex gap-4 pt-4">
                                 <button type="button" onClick={() => setIsVitalsModalOpen(false)} className="btn btn-secondary flex-1 h-11">Cancel</button>
-                                <button type="submit" className="btn btn-primary flex-1 h-11">Save Vitals</button>
+                                <button type="submit" disabled={isSubmitting} className="btn btn-primary flex-1 h-11 disabled:opacity-50">{isSubmitting ? 'Saving...' : 'Save Vitals'}</button>
                             </div>
                         </form>
                     </div>
@@ -534,7 +544,7 @@ export default function AdmissionsPage() {
 
                             <div className="flex gap-4 pt-4">
                                 <button type="button" onClick={() => setIsDischargeModalOpen(false)} className="btn btn-secondary flex-1 h-12">Cancel</button>
-                                <button type="submit" className="btn bg-rose-600 hover:bg-rose-700 text-white flex-1 h-12">Confirm Discharge</button>
+                                <button type="submit" disabled={isSubmitting} className="btn bg-rose-600 hover:bg-rose-700 text-white flex-1 h-12 disabled:opacity-50">{isSubmitting ? 'Processing...' : 'Confirm Discharge'}</button>
                             </div>
                         </form>
                     </div>

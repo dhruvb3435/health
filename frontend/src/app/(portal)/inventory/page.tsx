@@ -16,6 +16,7 @@ export default function InventoryPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -84,6 +85,8 @@ export default function InventoryPage() {
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await apiClient.post('/inventory', formData);
       toast.success('Stock item added successfully');
@@ -104,6 +107,8 @@ export default function InventoryPage() {
       fetchInventory(search, page);
     } catch {
       // handled by global interceptor
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -374,9 +379,10 @@ export default function InventoryPage() {
               <button
                 type="submit"
                 onClick={handleAddItem}
-                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold"
+                disabled={isSubmitting}
+                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold disabled:opacity-50"
               >
-                Add Stock Item
+                {isSubmitting ? 'Adding...' : 'Add Stock Item'}
               </button>
             </div>
           </div>

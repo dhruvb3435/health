@@ -29,6 +29,7 @@ export default function LaboratoryPage() {
     status: 'pending',
     orderedBy: '',
     notes: '',
+    priority: 'normal',
     testResults: [] as any[]
   });
 
@@ -108,6 +109,7 @@ export default function LaboratoryPage() {
         status: 'pending',
         orderedBy: '',
         notes: '',
+        priority: 'normal',
         testResults: []
       });
       fetchLabTests(search, page);
@@ -375,7 +377,7 @@ export default function LaboratoryPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">Priority</label>
-                  <select className="input h-11" defaultValue="normal">
+                  <select className="input h-11" value={formData.priority} onChange={e => setFormData({ ...formData, priority: e.target.value })}>
                     <option value="normal">Normal</option>
                     <option value="urgent">Urgent (STAT)</option>
                     <option value="emergency">Emergency</option>

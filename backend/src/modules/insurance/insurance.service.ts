@@ -11,6 +11,7 @@ import {
   InsuranceClaim,
   ClaimStatus,
 } from './entities/insurance.entity';
+import { Invoice } from '../billing/entities/invoice.entity';
 import {
   CreateInsuranceProviderDto,
   UpdateInsuranceProviderDto,
@@ -30,6 +31,8 @@ export class InsuranceService {
     private readonly providerRepo: Repository<InsuranceProvider>,
     @InjectRepository(InsuranceClaim)
     private readonly claimRepo: Repository<InsuranceClaim>,
+    @InjectRepository(Invoice)
+    private readonly invoiceRepo: Repository<Invoice>,
     private readonly tenantService: TenantService,
   ) {}
 
@@ -184,6 +187,21 @@ export class InsuranceService {
     }
     if (!provider.isActive) {
       throw new BadRequestException(`Provider "${provider.providerName}" is currently inactive`);
+    }
+
+    // Validate claim amount against invoice total when invoiceId is provided
+    if (dto.invoiceId) {
+      const invoice = await this.invoiceRepo.findOne({
+        where: { id: dto.invoiceId, organizationId },
+      });
+      if (!invoice) {
+        throw new NotFoundException(`Invoice with ID "${dto.invoiceId}" not found`);
+      }
+      if (dto.claimAmount > invoice.totalAmount) {
+        throw new BadRequestException(
+          `Claim amount (${dto.claimAmount}) cannot exceed invoice total (${invoice.totalAmount})`,
+        );
+      }
     }
 
     const claimNumber = await this.generateClaimNumber(organizationId);
@@ -437,6 +455,14 @@ export class InsuranceService {
       throw new BadRequestException(
         `approvedAmount is required when setting status to "${dto.status}"`,
       );
+    }
+
+    if (dto.approvedAmount !== undefined && dto.approvedAmount < 0) {
+      throw new BadRequestException('approvedAmount cannot be negative');
+    }
+
+    if (dto.settledAmount !== undefined && dto.settledAmount < 0) {
+      throw new BadRequestException('settledAmount cannot be negative');
     }
 
     if (

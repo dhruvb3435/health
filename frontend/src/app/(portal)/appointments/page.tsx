@@ -319,11 +319,11 @@ export default function AppointmentsPage() {
 
       {/* New Appointment Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-labelledby="new-appointment-title">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
             <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0">
               <div>
-                <h2 className="text-xl font-bold text-slate-900 font-display">New Appointment</h2>
+                <h2 id="new-appointment-title" className="text-xl font-bold text-slate-900 font-display">New Appointment</h2>
                 <p className="text-sm text-slate-500">Schedule a new consultation session</p>
               </div>
               <button

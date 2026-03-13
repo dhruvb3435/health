@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, MoreThan } from 'typeorm';
 import {
   BloodInventory,
   BloodRequest,
@@ -33,6 +33,7 @@ export class BloodBankService {
     @InjectRepository(BloodRequest)
     private readonly requestRepo: Repository<BloodRequest>,
     private readonly tenantService: TenantService,
+    private readonly dataSource: DataSource,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -343,40 +344,43 @@ export class BloodBankService {
     component: BloodComponent,
     unitsNeeded: number,
   ): Promise<void> {
-    const availableBags = await this.inventoryRepo.find({
-      where: {
-        organizationId,
-        bloodGroup,
-        component,
-        status: InventoryStatus.AVAILABLE,
-      },
-      order: { expiryDate: 'ASC' },
-    });
+    await this.dataSource.transaction(async (manager) => {
+      const availableBags = await manager.find(BloodInventory, {
+        where: {
+          organizationId,
+          bloodGroup,
+          component,
+          status: InventoryStatus.AVAILABLE,
+          expiryDate: MoreThan(new Date()),
+        },
+        order: { expiryDate: 'ASC' },
+      });
 
-    const totalAvailable = availableBags.reduce((sum, bag) => sum + bag.units, 0);
+      const totalAvailable = availableBags.reduce((sum, bag) => sum + bag.units, 0);
 
-    if (totalAvailable < unitsNeeded) {
-      throw new BadRequestException(
-        `Insufficient blood units available. Requested: ${unitsNeeded}, Available: ${totalAvailable} (${bloodGroup} ${component})`,
-      );
-    }
-
-    let remaining = unitsNeeded;
-
-    for (const bag of availableBags) {
-      if (remaining <= 0) break;
-
-      if (bag.units <= remaining) {
-        remaining -= bag.units;
-        bag.units = 0;
-        bag.status = InventoryStatus.ISSUED;
-      } else {
-        bag.units -= remaining;
-        remaining = 0;
+      if (totalAvailable < unitsNeeded) {
+        throw new BadRequestException(
+          `Insufficient blood units available. Requested: ${unitsNeeded}, Available: ${totalAvailable} (${bloodGroup} ${component})`,
+        );
       }
 
-      await this.inventoryRepo.save(bag);
-    }
+      let remaining = unitsNeeded;
+
+      for (const bag of availableBags) {
+        if (remaining <= 0) break;
+
+        if (bag.units <= remaining) {
+          remaining -= bag.units;
+          bag.units = 0;
+          bag.status = InventoryStatus.ISSUED;
+        } else {
+          bag.units -= remaining;
+          remaining = 0;
+        }
+
+        await manager.save(bag);
+      }
+    });
   }
 
   /**

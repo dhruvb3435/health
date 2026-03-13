@@ -17,6 +17,7 @@ export default function OperationTheaterPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -90,6 +91,8 @@ export default function OperationTheaterPage() {
 
   const handleCreateSurgery = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await apiClient.post('/operation-theater/surgeries', formData);
       toast.success('Surgery scheduled successfully');
@@ -106,6 +109,8 @@ export default function OperationTheaterPage() {
       fetchSurgeries(search, page);
     } catch {
       // handled by global interceptor
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -396,9 +401,10 @@ export default function OperationTheaterPage() {
               <button
                 type="submit"
                 onClick={handleCreateSurgery}
-                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold"
+                disabled={isSubmitting}
+                className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold disabled:opacity-50"
               >
-                Schedule Surgery
+                {isSubmitting ? 'Scheduling...' : 'Schedule Surgery'}
               </button>
             </div>
           </div>

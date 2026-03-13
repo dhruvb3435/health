@@ -49,10 +49,23 @@ export class DischargeSummaryService {
 
     async create(organizationId: string, dto: CreateDischargeSummaryDto) {
         const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
-        const count = await this.repo.count({
-            where: { organizationId },
-        });
-        const summaryNumber = `DIS-${today}-${String(count + 1).padStart(3, '0')}`;
+        const prefix = `DIS-${today}-`;
+
+        // Use MAX-based approach to avoid race condition with count-based IDs
+        const result = await this.repo
+            .createQueryBuilder('ds')
+            .where('ds.organizationId = :organizationId', { organizationId })
+            .andWhere('ds.summaryNumber LIKE :prefix', { prefix: `${prefix}%` })
+            .select('MAX(ds.summaryNumber)', 'maxNum')
+            .getRawOne();
+
+        let nextNumber = 1;
+        if (result?.maxNum) {
+            const numericPart = result.maxNum.split('-').pop();
+            nextNumber = parseInt(numericPart, 10) + 1;
+        }
+
+        const summaryNumber = `${prefix}${String(nextNumber).padStart(3, '0')}`;
 
         const summary = this.repo.create({
             ...dto,

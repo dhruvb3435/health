@@ -70,6 +70,6 @@ export class LaboratoryService {
 
     async remove(id: string) {
         const labTest = await this.findOne(id);
-        return this.labTestRepo.remove(labTest);
+        return this.labTestRepo.softRemove(labTest);
     }
 }

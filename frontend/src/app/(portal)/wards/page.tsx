@@ -16,6 +16,7 @@ export default function WardsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -68,6 +69,8 @@ export default function WardsPage() {
 
   const handleCreateWard = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await apiClient.post('/wards', {
         ...formData,
@@ -86,6 +89,8 @@ export default function WardsPage() {
       fetchData(search, page);
     } catch {
       // handled by global interceptor
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -351,9 +356,10 @@ export default function WardsPage() {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary flex-1 h-12 font-bold">Cancel</button>
                 <button
                   type="submit"
-                  className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold"
+                  disabled={isSubmitting}
+                  className="btn btn-primary flex-1 h-12 shadow-indigo-100 font-bold disabled:opacity-50"
                 >
-                  Create Ward
+                  {isSubmitting ? 'Creating...' : 'Create Ward'}
                 </button>
               </div>
             </form>

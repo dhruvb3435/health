@@ -4,6 +4,7 @@ import { Repository, Like } from 'typeorm';
 import { Ward, Bed, BedStatus } from './entities/ward.entity';
 import { PaginationQueryDto, PaginatedResponse } from '../../common/dto/pagination.dto';
 import { CreateWardDto, UpdateWardDto } from './dto/create-ward.dto';
+import { TenantService } from '../../common/services/tenant.service';
 
 @Injectable()
 export class WardsService {
@@ -12,18 +13,20 @@ export class WardsService {
     private readonly wardRepo: Repository<Ward>,
     @InjectRepository(Bed)
     private readonly bedRepo: Repository<Bed>,
+    private readonly tenantService: TenantService,
   ) { }
 
   async findAll(query: PaginationQueryDto): Promise<PaginatedResponse<Ward>> {
     const { page = 1, limit = 20, search } = query;
     const skip = (page - 1) * limit;
+    const organizationId = this.tenantService.getTenantId();
 
     const where = search
       ? [
-        { wardName: Like(`%${search}%`) },
-        { wardCode: Like(`%${search}%`) },
+        { wardName: Like(`%${search}%`), organizationId },
+        { wardCode: Like(`%${search}%`), organizationId },
       ]
-      : {};
+      : { organizationId };
 
     const [data, total] = await this.wardRepo.findAndCount({
       where,
@@ -44,8 +47,9 @@ export class WardsService {
   }
 
   async findOne(id: string) {
+    const organizationId = this.tenantService.getTenantId();
     const ward = await this.wardRepo.findOne({
-      where: { id },
+      where: { id, organizationId },
     });
 
     if (!ward) {
@@ -56,7 +60,8 @@ export class WardsService {
   }
 
   async create(createWardDto: CreateWardDto) {
-    const ward = this.wardRepo.create(createWardDto);
+    const organizationId = this.tenantService.getTenantId();
+    const ward = this.wardRepo.create({ ...createWardDto, organizationId });
     return this.wardRepo.save(ward);
   }
 
@@ -73,7 +78,8 @@ export class WardsService {
 
   // Keep existing methods for compatibility
   async getAllWards() {
-    return this.wardRepo.find();
+    const organizationId = this.tenantService.getTenantId();
+    return this.wardRepo.find({ where: { organizationId } });
   }
 
   async getWardById(id: string) {
@@ -81,16 +87,19 @@ export class WardsService {
   }
 
   async getAvailableBeds() {
-    return this.bedRepo.find({ where: { status: BedStatus.AVAILABLE } });
+    const organizationId = this.tenantService.getTenantId();
+    return this.bedRepo.find({ where: { status: BedStatus.AVAILABLE, organizationId } });
   }
 
   async getBedsByWard(wardId: string) {
-    return this.bedRepo.find({ where: { wardId } });
+    const organizationId = this.tenantService.getTenantId();
+    return this.bedRepo.find({ where: { wardId, organizationId } });
   }
 
   async getWardStats() {
-    const wards = await this.wardRepo.find();
-    const beds = await this.bedRepo.find();
+    const organizationId = this.tenantService.getTenantId();
+    const wards = await this.wardRepo.find({ where: { organizationId } });
+    const beds = await this.bedRepo.find({ where: { organizationId } });
     return {
       totalWards: wards.length,
       totalBeds: beds.length,
