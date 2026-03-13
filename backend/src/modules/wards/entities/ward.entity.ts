@@ -33,13 +33,13 @@ export class Ward {
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
-  @Column({ unique: true })
+  @Column({ length: 50, unique: true })
   wardCode: string;
 
-  @Column()
+  @Column({ length: 255 })
   wardName: string;
 
-  @Column()
+  @Column({ length: 500 })
   description: string;
 
   @Column({ type: 'int' })
@@ -54,19 +54,19 @@ export class Ward {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   pricePerDay: number;
 
-  @Column({ nullable: true })
+  @Column({ length: 36, nullable: true })
   wardIncharge: string; // Staff ID
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   floor: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   block: string;
 
   @Column({ type: 'text', nullable: true })
   facilities: string; // JSON array of facilities
 
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   remarks: string;
 
   @OneToMany(() => Bed, bed => bed.ward)
@@ -105,19 +105,21 @@ export class Bed {
   @JoinColumn({ name: 'wardId' })
   ward: Ward;
 
-  @Column()
+  @Column({ length: 50 })
   bedNumber: string;
 
   @Column({ type: 'enum', enum: BedStatus, default: BedStatus.AVAILABLE })
+  @Index()
   status: BedStatus;
 
   @Column({ nullable: true })
+  @Index()
   assignedPatientId: string;
 
   @Column({ nullable: true })
   assignedDate: Date;
 
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   remarks: string;
 
   @CreateDateColumn()

@@ -31,6 +31,8 @@ export enum PaymentStatus {
 @Index(['expenseType'])
 @Index(['status'])
 @Index(['organizationId'])
+@Index(['organizationId', 'status'])
+@Index(['organizationId', 'expenseDate'])
 export class Expense {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -42,22 +44,22 @@ export class Expense {
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
-  @Column()
+  @Column({ length: 50 })
   expenseId: string;
 
   @Column({ type: 'enum', enum: ExpenseType })
   expenseType: ExpenseType;
 
-  @Column()
+  @Column({ length: 500 })
   description: string;
 
   @Column('decimal', { precision: 12, scale: 2 })
   amount: number;
 
-  @Column()
+  @Column({ length: 255 })
   vendorName: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   invoiceNumber: string;
 
   @Column()
@@ -72,7 +74,7 @@ export class Expense {
   @Column({ nullable: true })
   paidDate: Date;
 
-  @Column({ nullable: true })
+  @Column({ length: 36, nullable: true })
   approvedBy: string; // Admin ID
 
   @Column({ type: 'text', nullable: true })
@@ -88,6 +90,8 @@ export class Expense {
 @Entity('revenue')
 @Index(['source'])
 @Index(['organizationId'])
+@Index(['organizationId', 'source'])
+@Index(['organizationId', 'date'])
 export class Revenue {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -99,10 +103,10 @@ export class Revenue {
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
-  @Column()
+  @Column({ length: 50 })
   revenueId: string;
 
-  @Column()
+  @Column({ length: 100 })
   source: string; // patient_fees, insurance, consultation, etc.
 
   @Column('decimal', { precision: 12, scale: 2 })
@@ -117,7 +121,7 @@ export class Revenue {
   @Column({ nullable: true })
   invoiceId: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   remarks: string;
 
   @CreateDateColumn()

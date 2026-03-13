@@ -45,6 +45,7 @@ export class InsuranceProvider {
   id: string;
 
   @Column()
+  @Index()
   organizationId: string;
 
   @ManyToOne(() => Organization, { onDelete: 'CASCADE' })
@@ -60,19 +61,19 @@ export class InsuranceProvider {
   @Column({ length: 200, nullable: true })
   contactPerson: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   contactEmail: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   contactPhone: string;
 
   @Column({ type: 'text', nullable: true })
   address: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   panNumber: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   gstNumber: string;
 
   @Column({ default: true })
@@ -123,6 +124,7 @@ export class InsuranceClaim {
   patient: Patient;
 
   @Column({ nullable: true })
+  @Index()
   doctorId: string;
 
   @ManyToOne(() => Doctor, { onDelete: 'RESTRICT', nullable: true })
@@ -136,7 +138,7 @@ export class InsuranceClaim {
   @JoinColumn({ name: 'providerId' })
   provider: InsuranceProvider;
 
-  @Column({ nullable: true })
+  @Column({ length: 36, nullable: true })
   invoiceId: string;
 
   @Column({ length: 100 })
@@ -148,7 +150,7 @@ export class InsuranceClaim {
   /**
    * Relationship of the policy holder to the patient: self / spouse / child / parent
    */
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   relationToPatient: string;
 
   @Column({ type: 'date', nullable: true })
@@ -160,7 +162,7 @@ export class InsuranceClaim {
   /**
    * ICD-10 diagnosis code (e.g. J18.9 — Pneumonia, unspecified)
    */
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   diagnosisCode: string;
 
   @Column({ type: 'text' })
@@ -191,10 +193,10 @@ export class InsuranceClaim {
   })
   status: ClaimStatus;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   tpaReferenceNumber: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   preAuthNumber: string;
 
   @Column({ type: 'date', nullable: true })

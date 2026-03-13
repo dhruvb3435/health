@@ -46,7 +46,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column({ length: 50, unique: true })
   userId: string; // Custom user ID (e.g., DOC-001, PAT-001)
 
   @Column()
@@ -60,13 +60,13 @@ export class User {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ length: 100 })
   firstName: string;
 
-  @Column()
+  @Column({ length: 100 })
   lastName: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   phoneNumber: string;
 
   @Column({ nullable: true })
@@ -75,19 +75,19 @@ export class User {
   @Column({ nullable: true })
   gender: 'male' | 'female' | 'other';
 
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   address: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   city: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   state: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   postalCode: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   country: string;
 
   @Column()

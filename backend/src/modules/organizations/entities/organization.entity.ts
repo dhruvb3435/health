@@ -27,10 +27,10 @@ export class Organization {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
+    @Column({ length: 255 })
     name: string;
 
-    @Column({ unique: true })
+    @Column({ length: 100, unique: true })
     @Index()
     slug: string;
 

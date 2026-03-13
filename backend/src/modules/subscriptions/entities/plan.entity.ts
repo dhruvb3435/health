@@ -22,10 +22,10 @@ export class Plan {
     @Index()
     tier: SubscriptionPlanTier;
 
-    @Column()
+    @Column({ length: 100 })
     name: string;
 
-    @Column({ unique: true })
+    @Column({ length: 100, unique: true })
     @Index()
     slug: string;
 
@@ -35,7 +35,7 @@ export class Plan {
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
     price: number;
 
-    @Column({ default: 'INR' })
+    @Column({ length: 3, default: 'INR' })
     currency: string;
 
     @Column({
@@ -46,11 +46,11 @@ export class Plan {
     billingCycle: BillingCycle;
 
     // Stripe or Razorpay Product Reference
-    @Column({ nullable: true })
+    @Column({ length: 255, nullable: true })
     productId: string;
 
     // Stripe or Razorpay Price Reference
-    @Column({ nullable: true })
+    @Column({ length: 255, nullable: true })
     priceId: string;
 
     @Column({ default: true })

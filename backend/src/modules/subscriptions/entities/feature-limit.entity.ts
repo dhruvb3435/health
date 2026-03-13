@@ -22,9 +22,10 @@ export class FeatureLimit {
     plan: Plan;
 
     @Column({ type: 'uuid' })
+    @Index()
     planId: string;
 
-    @Column()
+    @Column({ length: 100 })
     featureKey: string;
 
     // e.g. 1000 MAX_PATIENTS. Use -1 or null for unlimited. Use 1 for ON/OFF.

@@ -72,7 +72,7 @@ export class EmergencyCase {
    * Auto-generated on registration. Format: EMR-YYYYMMDD-NNN
    * e.g. EMR-20260312-001
    */
-  @Column()
+  @Column({ length: 50 })
   caseNumber: string;
 
   /**
@@ -80,6 +80,7 @@ export class EmergencyCase {
    * Can be linked later once the patient is identified.
    */
   @Column({ nullable: true })
+  @Index()
   patientId: string;
 
   @ManyToOne(() => Patient, { nullable: true, onDelete: 'SET NULL' })
@@ -90,6 +91,7 @@ export class EmergencyCase {
    * Nullable — doctor may be assigned at triage or later during treatment.
    */
   @Column({ nullable: true })
+  @Index()
   doctorId: string;
 
   @ManyToOne(() => Doctor, { nullable: true, onDelete: 'SET NULL' })
@@ -133,7 +135,7 @@ export class EmergencyCase {
    * Clinical injury/presentation category.
    * e.g. trauma, cardiac, respiratory, neurological, burns, poisoning, obstetric
    */
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   injuryType: string;
 
   @Column({ type: 'text', nullable: true })
@@ -150,7 +152,7 @@ export class EmergencyCase {
    * e.g. "Admitted to Ward 3 - Cardiology", "Discharged with prescription",
    * "Transferred to City Hospital ICU"
    */
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   disposition: string;
 
   /**

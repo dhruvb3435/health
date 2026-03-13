@@ -59,7 +59,7 @@ export class Invoice {
   @Column()
   patientId: string;
 
-  @Column({ unique: true })
+  @Column({ length: 50, unique: true })
   invoiceNumber: string;
 
   @Column('jsonb')
@@ -115,13 +115,13 @@ export class Invoice {
     reference: string;
   }[];
 
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   notes: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 36, nullable: true })
   insuranceClaimId: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   pdfUrl: string; // S3 URL to generated PDF
 
   @CreateDateColumn()

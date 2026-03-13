@@ -52,10 +52,10 @@ export class Patient {
   @Column({ name: 'custom_user_id', nullable: true })
   customUserId: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   patientId: string; // Custom patient ID (e.g., PAT-001)
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   ssn: string; // Social Security Number (encrypted)
 
   @Column({
@@ -71,22 +71,22 @@ export class Patient {
   @Column('text', { array: true, default: [] })
   chronicDiseases: string[];
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   insuranceProvider: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   insurancePolicyNumber: string;
 
   @Column({ nullable: true })
   insuranceExpiry: Date;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   emergencyContactName: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   emergencyContactPhone: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   emergencyContactRelation: string;
 
   @Column({ type: 'float', nullable: true })
@@ -98,7 +98,7 @@ export class Patient {
   @Column({ nullable: true })
   maritalStatus: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   occupation: string;
 
   @OneToMany(() => Appointment, (appointment) => appointment.patient)

@@ -38,12 +38,13 @@ export class Payment {
     subscription: Subscription;
 
     @Column({ type: 'uuid', nullable: true })
+    @Index()
     subscriptionId: string;
 
     @Column({ type: 'decimal', precision: 10, scale: 2 })
     amount: number;
 
-    @Column({ default: 'INR' })
+    @Column({ length: 3, default: 'INR' })
     currency: string;
 
     @Column({
@@ -54,15 +55,15 @@ export class Payment {
     @Index()
     status: PaymentStatus;
 
-    @Column({ nullable: true })
+    @Column({ length: 50, nullable: true })
     paymentMethod: string;
 
     // e.g. Razorpay/Stripe Payment ID
-    @Column({ nullable: true, unique: true })
+    @Column({ length: 255, unique: true, nullable: true })
     @Index()
     gatewayTransactionId: string;
 
-    @Column({ nullable: true })
+    @Column({ length: 500, nullable: true })
     invoiceUrl: string;
 
     @Column({ type: 'timestamp', nullable: true })

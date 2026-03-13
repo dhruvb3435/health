@@ -17,6 +17,8 @@ import { Organization } from '../../organizations/entities/organization.entity';
 @Index(['patientId'])
 @Index(['recordType'])
 @Index(['createdAt'])
+@Index(['organizationId', 'recordType'])
+@Index(['visitDate'])
 export class MedicalRecord {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -37,10 +39,10 @@ export class MedicalRecord {
   @Column()
   patientId: string;
 
-  @Column()
+  @Column({ length: 100 })
   recordType: string; // 'consultation', 'diagnosis', 'test', 'surgery', etc.
 
-  @Column()
+  @Column({ length: 255 })
   title: string;
 
   @Column('text')
@@ -55,7 +57,7 @@ export class MedicalRecord {
   @Column({ nullable: true })
   treatment: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   doctorName: string;
 
   @Column({ nullable: true })

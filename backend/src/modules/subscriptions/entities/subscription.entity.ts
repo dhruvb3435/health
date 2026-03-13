@@ -34,6 +34,7 @@ export class Subscription {
     plan: Plan;
 
     @Column({ type: 'uuid' })
+    @Index()
     planId: string;
 
     @Column({
@@ -54,15 +55,16 @@ export class Subscription {
     currentPeriodStart: Date;
 
     @Column({ type: 'timestamp', nullable: true })
+    @Index()
     currentPeriodEnd: Date;
 
     @Column({ default: false })
     cancelAtPeriodEnd: boolean;
 
-    @Column({ nullable: true })
+    @Column({ length: 255, nullable: true })
     gatewaySubscriptionId: string;
 
-    @Column({ nullable: true })
+    @Column({ length: 255, nullable: true })
     gatewayCustomerId: string;
 
     @CreateDateColumn()

@@ -13,6 +13,7 @@ import { Organization } from '../../organizations/entities/organization.entity';
 
 @Entity('departments')
 @Index(['organizationId', 'name'], { unique: true })
+@Index(['organizationId', 'isActive'])
 export class Department {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -31,13 +32,14 @@ export class Department {
   @Column({ nullable: true, length: 500 })
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 36, nullable: true })
   headOfDepartmentId: string;
 
   @Column({ default: true })
   isActive: boolean;
 
   @Column({ nullable: true })
+  @Index()
   parentDepartmentId: string;
 
   @ManyToOne(() => Department, { nullable: true, onDelete: 'SET NULL' })

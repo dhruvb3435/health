@@ -63,7 +63,7 @@ export class Appointment {
   @Column({ type: 'timestamp' })
   appointmentDate: Date;
 
-  @Column()
+  @Column({ length: 10 })
   appointmentTime: string; // HH:MM format
 
   @Column({ nullable: true })
@@ -79,7 +79,7 @@ export class Appointment {
   })
   status: AppointmentStatus;
 
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   reason: string; // Chief complaint or reason for visit
 
   @Column('text', { nullable: true })

@@ -98,7 +98,7 @@ export class Ambulance {
    * Last known GPS location or landmark description.
    * Updated by the dispatcher or driver app.
    */
-  @Column({ nullable: true })
+  @Column({ length: 500, nullable: true })
   currentLocation: string;
 
   /**
@@ -163,6 +163,7 @@ export class AmbulanceTrip {
   organization: Organization;
 
   @Column()
+  @Index()
   ambulanceId: string;
 
   @ManyToOne(() => Ambulance, { nullable: false, onDelete: 'RESTRICT' })
@@ -173,7 +174,7 @@ export class AmbulanceTrip {
    * Auto-generated on dispatch. Format: TRIP-YYYYMMDD-NNN
    * e.g. TRIP-20260312-001
    */
-  @Column()
+  @Column({ length: 50 })
   tripNumber: string;
 
   /**
@@ -181,6 +182,7 @@ export class AmbulanceTrip {
    * Null for walk-in callers or unidentified patients.
    */
   @Column({ nullable: true })
+  @Index()
   patientId: string;
 
   @ManyToOne(() => Patient, { nullable: true, onDelete: 'SET NULL' })
@@ -192,10 +194,10 @@ export class AmbulanceTrip {
    * Required even when patientId is supplied — acts as the snapshot name
    * so the record remains readable if the patient record is later edited.
    */
-  @Column()
+  @Column({ length: 255 })
   patientName: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   patientContact: string;
 
   @Column({ type: 'text' })

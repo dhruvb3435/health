@@ -29,25 +29,25 @@ export class Medicine {
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
-  @Column({ unique: true })
+  @Column({ length: 50, unique: true })
   medicineCode: string; // e.g., MED-001
 
-  @Column()
+  @Column({ length: 255 })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   genericName: string;
 
-  @Column()
+  @Column({ length: 100 })
   strength: string; // e.g., "500mg", "10ml"
 
-  @Column()
+  @Column({ length: 100 })
   formulation: string; // 'Tablet', 'Capsule', 'Syrup', 'Injection', etc.
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   manufacturer: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   batchNumber: string;
 
   @Column('text', { nullable: true })

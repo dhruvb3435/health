@@ -26,6 +26,8 @@ export enum LabTestStatus {
 @Index(['status'])
 @Index(['orderedDate'])
 @Index(['organizationId'])
+@Index(['organizationId', 'status'])
+@Index(['organizationId', 'patientId'])
 export class LabTest {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -44,10 +46,10 @@ export class LabTest {
   @Column()
   patientId: string;
 
-  @Column()
+  @Column({ length: 255 })
   testName: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   testCode: string;
 
   @Column({
@@ -60,7 +62,7 @@ export class LabTest {
   @Column('text')
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   orderedBy: string; // Doctor name or ID
 
   @Column({ type: 'timestamp' })
@@ -84,7 +86,7 @@ export class LabTest {
   @Column('text', { nullable: true })
   interpretation: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   reportedBy: string; // Lab technician name
 
   @Column({ nullable: true })

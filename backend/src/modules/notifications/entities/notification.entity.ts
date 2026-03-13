@@ -19,19 +19,19 @@ export class Notification {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
+    @Column({ name: 'organization_id' })
     @Index()
     organizationId: string;
 
     @ManyToOne(() => Organization, { nullable: false, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'organizationId' })
+    @JoinColumn({ name: 'organization_id' })
     organization: Organization;
 
-    @Column({ nullable: true })
+    @Column({ name: 'user_id', nullable: true })
     userId: string; // null = org-wide notification
 
     @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
-    @JoinColumn({ name: 'userId' })
+    @JoinColumn({ name: 'user_id' })
     user: User;
 
     @Column({ length: 50 })
@@ -46,10 +46,10 @@ export class Notification {
     @Column({ type: 'jsonb', nullable: true })
     data: Record<string, any>; // extra payload: links, IDs, etc.
 
-    @Column({ default: false })
+    @Column({ name: 'is_read', default: false })
     isRead: boolean;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
 
     constructor(partial: Partial<Notification>) {
